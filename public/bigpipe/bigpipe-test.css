@@ -1,0 +1,25 @@
+@charset "utf-8";
+
+.view{
+    overflow: hidden;
+}
+
+.page {
+    width: 25%;
+    line-height: 18px;
+    float: left;
+}
+
+.value{
+    min-height: 600px;
+    margin: 10px;
+    padding: 10px;
+    background-color: #ccc;
+    text-align: center;
+}
+
+.value .title{
+    text-align: center;
+}
+
+p{margin: 0;}

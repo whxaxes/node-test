@@ -1,0 +1,39 @@
+*{font-family: "微软雅黑"}
+html,body,ul,li{margin: 0;padding: 0;}
+ul,li{list-style-type: none}
+.wrap{
+    position: relative;
+    width: 1000px;
+    margin: 20px auto;
+    border: 1px solid #333;
+}
+.choose{
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    border-bottom: 1px solid #333;
+}
+.choose li{
+    float: left;
+    width: 33.3%;
+}
+.choose li a{
+    display: block;
+    width: 100%;
+    line-height: 50px;
+    text-align: center;
+    border-right: 1px solid #333;
+    text-decoration: none;
+    color: #333;
+}
+.choose .on a{
+    background-color: #333;
+    color: #FFF;
+}
+.contents{
+    padding: 10px 10px 0 10px;
+    min-height: 300px;
+}
+.contents img{
+    max-width: 100%;
+}

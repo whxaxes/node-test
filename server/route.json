@@ -1,0 +1,13 @@
+{
+//  bigpipe
+  "bigpipe":"func:bigpipe",
+
+//  pjax
+  "pjax/*.html":"func:pjax",
+
+//  upload file
+  "uindex":"url:upload/index.html",
+  "upl":"url:upload/upload.html",
+  "getProgress":"func:getProgress",
+  "upload":"func:upload"
+}

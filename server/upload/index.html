@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1, target-densitydpi=medium-dpi, user-scalable=no">
+    <title>图片上传</title>
+    <style>
+        iframe{display: none;}
+        .data img{max-width: 100%;}
+    </style>
+    <script src="/public/jquery-2.1.1.min.js"></script>
+    <script>
+        window.onload = function(){
+            var frame = $("#upl")[0];
+            var cd;
+            var checking = false;
+
+            frameInit();
+            frame.onload = function(){
+                frameInit();
+                if($(cd).find("#path").length>0){
+                    var path = $(cd).find("#path")[0].innerHTML;
+                    if(/png|gif|jpg/g.test(path)){
+                        $(".data").html("<img src='"+path+"'><br>")
+                    }else {
+                        $(".data").html("<a href='"+path+"' target='_blank'>"+path+"</a><br>")
+                    }
+
+                    checking = false;
+                    frame.src = "upl";
+                }else if($(cd).find("#reason").length>0){
+                    $(".data").html("(无)");
+                    checking = false;
+                    alert($(cd).find("#reason")[0].innerHTML);
+                    frame.src = "upl";
+                }
+            }
+
+            $(".choose").click(function(){
+                $(cd).find("#data").click();
+            });
+
+            function frameInit(){
+                cd = frame.contentDocument.body;
+
+                var dataFileInput = $(cd).find("#data")[0]
+                if(dataFileInput){
+                    dataFileInput.onchange = function(){
+                        $(cd).find("#sub").click();
+
+                        checking = true;
+                        getProgress();
+                    }
+                }
+            }
+
+            function getProgress(){
+                $.ajax({
+                    url:'/getProgress',
+                    type:'get',
+                    dataType:"json",
+                    success:function(data){
+                        if(checking){
+                            $(".data").html("上传进度：" + (parseInt(100*data.now / data.all) || 0) + "%<br>上传速度："+(data.speed||(0+"KB/S")));
+
+                            setTimeout(function(){getProgress();},200)
+                        }
+                    },
+                    error:function(e){
+                        console.log(e)
+                    }
+                })
+            }
+        }
+    </script>
+</head>
+<body>
+    您上传的东西为：<br><br>
+    <div class="data">(无)</div>
+    <br>
+    <button class="choose">上传东西</button>
+    <iframe src="upl" frameborder="0" id="upl"></iframe>
+</body>
+</html>
