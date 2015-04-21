@@ -1,5 +1,5 @@
 var fs = require('fs');
-var path = require('path')
+var path = require('path');
 var cheerio = require('cheerio');
 module.exports = function(req , res , urlObj , directTo404){
     var pathname = urlObj.pathname;
