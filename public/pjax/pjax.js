@@ -12,6 +12,7 @@
 
         if('pushState' in history){
             e.preventDefault();
+
             var state = {
                 num:$li.index($(".choose .on")),
                 url:w.location.href

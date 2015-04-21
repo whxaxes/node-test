@@ -9,7 +9,7 @@ module.exports = {
     getProgress:getProgress,
 
     upload:upload
-};
+}
 
 function getProgress(req , res){
     if(req.symbolKey in seesionMaps){

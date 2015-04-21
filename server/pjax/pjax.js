@@ -1,7 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var cheerio = require('cheerio');
-module.exports = function(req , res , urlObj , directTo404){
+module.exports = function(req , res , urlObj){
     var pathname = urlObj.pathname;
     var filename = pathname.substring(pathname.lastIndexOf("/")+1 , pathname.length);
 
