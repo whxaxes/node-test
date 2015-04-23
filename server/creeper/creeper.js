@@ -5,6 +5,8 @@ var cheerio = require("cheerio");
 var ejs = require("ejs");
 var fs = require("fs");
 var path = require("path");
+
+var crypto = require("crypto");
 var nodemailer = require("nodemailer");
 var config = require("./config");
 var source = require("./source");
@@ -16,6 +18,7 @@ for(var k in source){
 
 var noop = function(){};
 
+//简单的数据爬取逻辑
 var data = {};
 function catchData(id , callback){
     var nowSource = source[id];
@@ -45,6 +48,7 @@ function catchData(id , callback){
     })
 }
 
+//邮件发送
 var transporter = nodemailer.createTransport(config.mail.from);
 function sendMail(subject, html) {
     var mailOptions = {
@@ -64,25 +68,32 @@ function sendMail(subject, html) {
     });
 };
 
-function dataCollect(index){
+//根据source里的源逐个爬取数据
+function dataCollect(index , callback){
+    callback = callback || noop;
     index = index || 0;
+
     catchData(ids[index] , function(){
-        console.log("【"+ids[index] + "】数据采集成功");
+        console.log(">【"+ids[index] + "】get√");
 
         index++;
         if(index == ids.length){
-            fs.writeFileSync(baseDir + 'result.txt' , JSON.stringify(data));
             console.log("数据采集完成..")
+            callback();
         }else {
-            dataCollect(index);
+            dataCollect(index , callback);
         }
     })
 }
 
-function getHtml(){
+function getHtml(data){
     var html = fs.readFileSync(baseDir + "creeper.ejs").toString();
-    var data = JSON.parse(fs.readFileSync(baseDir + "result.txt").toString());
-    return ejs.render(html , {data:data});
+    try{
+        data = data || JSON.parse(JSON.parse(fs.readFileSync(baseDir + "result.txt").toString()).data);
+        return ejs.render(html , {data:data});
+    }catch(e){
+        return html;
+    }
 }
 
 module.exports = function(req , res){
@@ -96,17 +107,36 @@ module.exports = function(req , res){
 };
 
 var olddate = null;
+var updateTime = 0;//每天0点更新一次数据
 function main(){
     var date = new Date();
+    var time = date.getHours();
 
-    if(date !== olddate){
-        var time = date.getHours();
-        if(time==16){
-            olddate = date;
-            console.log("开始采集数据...");
-            dataCollect();
-        }
-    }
+
+    if(date === olddate || time !== updateTime) return;
+
+    olddate = date;
+    console.log("开始采集数据...");
+    dataCollect(0 , function(){
+        fs.readFile(baseDir + 'result.txt' , function(err , str){
+            var jsonStr = JSON.stringify(data);
+            var save = {
+                data : jsonStr,
+                md5 : crypto.createHash("md5").update(jsonStr).digest("hex")
+            }
+
+            if(!err){
+                var oldmd5 = JSON.parse(str.toString());
+            }
+
+            if(err || oldmd5!==save.md5){
+                sendMail("每日博客", getHtml(data));
+                fs.writeFileSync(baseDir + 'result.txt' , JSON.stringify(save));
+            }
+
+            data = {}
+        })
+    });
 
     setTimeout(main , 60 * 60 * 1000);
 }
