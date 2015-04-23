@@ -1,2 +1,3 @@
 node_modules/
 public/upload/
+server/creeper/config.js

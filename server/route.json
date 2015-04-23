@@ -5,6 +5,9 @@
 //  pjax
   "pjax/*.html":"func:pjax",
 
+//  creeper
+  "creeper":"func:creeper",
+
 //  upload file
   "uindex":"url:upload/index.html",
   "upl":"url:upload/upload.html",

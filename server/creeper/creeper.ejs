@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>抓取博客首页信息</title>
+    <style>
+        html,body{margin: 0;padding:0;}
+        .wrap{width: 100%;overflow: hidden;padding-bottom: 50px;}
+        ul, li {
+            margin: 0;
+            padding: 0;
+            list-style-type: none !important;
+            font-family: "微软雅黑";
+        }
+        .mb-nav{
+            margin-bottom: 30px;
+        }
+        .mb-blog-name {
+            display: block;
+            margin: 10px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .mb-item,.no-data{
+            padding-left: 20px;
+            -webkit-transition: background-color .3s;
+        }
+        .mb-item:hover{
+            background-color: #f86143;
+        }
+
+        a{
+            color: #333;
+            text-decoration: none !important;
+        }
+
+        .mb-item a {
+            display: block;
+            margin-right: 20px;
+            line-height: 30px;
+            -webkit-transition: -webkit-transform .3s;
+            -webkit-transform: translate(0px, 0);
+        }
+
+        .mb-item a:hover {
+            color: #fff;
+            -webkit-transform: translate(10px, 0);
+        }
+
+        .blog-time {
+            font-size: 13px;
+            float: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <%for(var k in data){%>
+        <ul class="mb-nav">
+            <a href="" class="mb-blog-name"><%= k%></a>
+
+            <%for(var i=0;i<data[k].length;i++){%>
+            <li class="mb-item">
+                <a href="<%= data[k][i].url%>" target="_blank" class="mb-title" >
+                    <%= data[k][i].title%>
+
+                    <%if(data[k][i].time){%>
+                    <span class="blog-time"><%= data[k][i].time%></span>
+                    <%}%>
+                </a>
+            </li>
+            <%}%>
+        </ul>
+        <%}%>
+    </div>
+</body>
+</html>
