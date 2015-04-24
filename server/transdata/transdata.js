@@ -1,59 +1,121 @@
-//数据地址表
-var sourceAddress = {
-    smoke:{
-        hostname:'100.84.47.67',
-        port:9261
-    },
-    local:{
-        hostname:'100.84.52.111',
-        port:9261
-    }
+"use strict";
+var http = require("http");
+var stream = require("stream");
+var url = require("url");
+
+var noop = function () {
 };
-var sourceKind = 'smoke';
 
-module.exports = function(req , res , urlObj){
-    //请求转发逻辑
-    var options = {
-        hostname:sourceAddress[sourceKind].hostname,
-        port:sourceAddress[sourceKind].port,
-        path:urlObj.pathname,
-        method:'post',
-        headers:{
-            'Content-Type':req.headers['content-type'],
-            'Content-Length':req.headers['content-length']
+var transdata = {
+    post: function (opt) {
+        opt.method = "post";
+        main(opt);
+    },
+
+    get: function (opt) {
+        if(arguments.length>=2){
+            opt = {
+                url:arguments[0],
+                success:arguments[1]
+            }
         }
+
+        opt.method = "get";
+        main(opt);
+    }
+}
+
+function main(opt) {
+    var options, creq;
+
+    opt.res = ((opt.res instanceof http.ServerResponse) || (opt.res instanceof stream.Writable)) ? opt.req : null;
+    opt.success = (typeof opt.success == "function") ? opt.success : noop;
+    opt.error = (typeof opt.error == "function") ? opt.error : noop;
+
+    try {
+        opt.url = (typeof opt.url == "string") ? url.parse(opt.url) : null;
+    } catch (e) {
+        opt.url = null;
     }
 
-    //建立链向数据服务器的请求
-    var creq = http.request(options , function(cres){
-        console.log(urlObj.pathname+"：服务器响应成功...");
+    if (!opt.url) {
+        opt.error(new Error("url is illegal"));
+        return;
+    }
 
-        res.writeHead(200 , {
-            'Content-Type':cres.headers['content-type'] || 'application/json; charset=UTF-8',
-            'Content-Length':cres.headers['content-length']
+    if (opt.method == "get") {
+        http.get(opt.url.href, function (res) {
+            reqCallback(opt.res, res, opt.success)
+        }).on("error", function (e) {
+            opt.error(e);
+        })
+    } else {
+        options = {
+            hostname: opt.url.hostname,
+            port: opt.url.port,
+            path: opt.url.pathname,
+            method: "post"
+        };
+
+        if (opt.req instanceof stream.Readable) {
+            if ('headers' in opt.req) {
+                options['headers'] = {
+                    'Content-Type': opt.req.headers['content-type'],
+                    'Content-Length': opt.req.headers['content-length']
+                };
+            }
+
+            process.nextTick(function(){
+                opt.req.pipe(creq);
+            })
+        } else if ((typeof opt.req) == "string") {
+            options['headers'] = {
+                'Content-Type': "text/plain; charset=utf-8",
+                'Content-Length': opt.req.length
+            };
+
+            process.nextTick(function(){
+                creq.write(opt.req);
+            })
+        }else {
+            opt.error(new Error("illegal request"));
+            return;
+        }
+
+        creq = http.request(options, function (res) {
+            reqCallback(opt.res, res, opt.success)
+        }).on('error', function (e) {
+            opt.error(e);
+        })
+    }
+}
+
+function reqCallback(ores, res, callback) {
+    if (ores) {
+        ores.on('finish', function () {
+            callback();
         });
 
-        var once = false;
-        cres.on('data' , function(chunk){
-            if(!once){
-                console.log(urlObj.pathname+"：开始接收数据并写出...");
-                once = !once;
-            }
-            res.write(chunk);
-        }).on('end' , function(){
-            console.log(urlObj.pathname+"：接收完成");
-            res.end();
-        })
-    }).on('error' , function(e){
-        console.log(e.message);
-        directTo404(res)
-    });
+        if (ores instanceof http.ServerResponse) {
+            ores.writeHead(200, {
+                'Content-Type': res.headers['content-type'] || 'application/json; charset=UTF-8',
+                'Content-Length': res.headers['content-length']
+            });
+        }
 
-    req.on('data' , function(chunk){
-        //以流的形式写入请求数据
-        creq.write(chunk)
-    }).on('end' , function(){
-        console.log(urlObj.pathname+"：转发接口请求成功，等待服务器响应...");
-        creq.end()
-    })
+        res.pipe(ores);
+    } else {
+        var size = 0;
+        var chunks = [];
+
+        res.on('data', function (chunk) {
+            size += chunk.length;
+            chunks.push(chunk);
+        }).on('end', function () {
+            callback(Buffer.concat(chunks, size).toString())
+        })
+    }
 }
+
+module.exports = transdata;
+
