@@ -1,12 +1,14 @@
+"use strict";
+
 var baseDir = __dirname + PATH_LINE;
 
 var http = require("http");
-var cheerio = require("cheerio");
-var ejs = require("ejs");
 var fs = require("fs");
 var path = require("path");
-
 var crypto = require("crypto");
+
+var cheerio = require("cheerio");
+var ejs = require("ejs");
 var nodemailer = require("nodemailer");
 var config = require("./config");
 var source = require("./source");
@@ -16,10 +18,14 @@ for(var k in source){
     ids.push(k);
 }
 
+var data = {};
 var noop = function(){};
+var isUpdate = false;//是否已经更新数据
+var updateTime = 0;//每天0点更新一次数据
+var updateJg = 60 * 60 * 1000;
+var transporter = nodemailer.createTransport(config.mail.from);
 
 //简单的数据爬取逻辑
-var data = {};
 function catchData(id , callback){
     var nowSource = source[id];
 
@@ -37,7 +43,7 @@ function catchData(id , callback){
         res.on('end' , function(){
             var result = Buffer.concat(chunks , size).toString();
 
-            result = nowSource.hanle(cheerio.load(result)).slice(0 , 10)
+            result = nowSource.hanle(cheerio.load(result)).slice(0 , 10);
 
             if(result.length){
                 data[id] = result;
@@ -49,7 +55,6 @@ function catchData(id , callback){
 }
 
 //邮件发送
-var transporter = nodemailer.createTransport(config.mail.from);
 function sendMail(subject, html) {
     var mailOptions = {
         from: 'wanghx<'+config.mail.from.auth.user+'>',
@@ -78,7 +83,7 @@ function dataCollect(index , callback){
 
         index++;
         if(index == ids.length){
-            console.log("数据采集完成..")
+            console.log("数据采集完成..");
             callback();
         }else {
             dataCollect(index , callback);
@@ -96,26 +101,18 @@ function getHtml(data){
     }
 }
 
-module.exports = function(req , res){
-    var html = getHtml();
-
-    res.writeHead(200 , {'content-type':'text/html;charset=utf-8'});
-    res.end(html);
-
-    //发送邮件给自己
-    //sendMail("每日博客", html);
-};
-
-var olddate = null;
-var updateTime = 0;//每天0点更新一次数据
 function main(){
     var date = new Date();
     var time = date.getHours();
 
+    if(time !== updateTime){
+        isUpdate = false;
+        return;
+    }
 
-    if(date === olddate || time !== updateTime) return;
+    if(isUpdate) return;
 
-    olddate = date;
+    isUpdate = true;
     console.log("开始采集数据...");
     dataCollect(0 , function(){
         fs.readFile(baseDir + 'result.txt' , function(err , str){
@@ -138,7 +135,14 @@ function main(){
         })
     });
 
-    setTimeout(main , 60 * 60 * 1000);
+    setTimeout(main , updateJg);
 }
 
 main();
+
+module.exports = function(req , res){
+    var html = getHtml();
+
+    res.writeHead(200 , {'content-type':'text/html;charset=utf-8'});
+    res.end(html);
+};

@@ -1,3 +1,5 @@
+"use strict";
+
 var http = require('http');
 var fs = require('fs');
 var crypto = require("crypto");
@@ -9,7 +11,7 @@ module.exports = {
     getProgress:getProgress,
 
     upload:upload
-}
+};
 
 function getProgress(req , res){
     if(req.symbolKey in seesionMaps){

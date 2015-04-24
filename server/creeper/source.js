@@ -1,3 +1,5 @@
+"use strict";
+
 String.prototype.trim = function(){
     return this.replace(/(^(\s+))|((\s+)$)/g, '');
 }
@@ -7,9 +9,9 @@ module.exports = {
         url:"http://www.alloyteam.com",
         hanle:function($){
             var result = [];
-            var $li = $(".articlemenu>li");
+            var $colum = $(".articlemenu>li");
 
-            $li.each(function(i , ele){
+            $colum.each(function(i , ele){
                 try{
                     var time = $(this).find(".blogPs").text().match(/\d{4}[^x00-xff]{1}\d{1,2}[^x00-xff]{1}\d{1,2}/)[0].replace(/[^x00-xff]/g , '-');
                 }catch(e){}
