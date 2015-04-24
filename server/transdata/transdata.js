@@ -8,9 +8,8 @@ var sourceAddress = {
         hostname:'100.84.52.111',
         port:9261
     }
-}
+};
 var sourceKind = 'smoke';
-
 
 module.exports = function(req , res , urlObj){
     //请求转发逻辑
