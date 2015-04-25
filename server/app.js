@@ -15,6 +15,7 @@ var pjax = require('./pjax/pjax');
 var getProgress = require('./upload/upload').getProgress;
 var upload = require('./upload/upload').upload;
 var creeper = require('./creeper/creeper');
+var tdata = require('./transdata/tdata');
 
 //路由表
 try{

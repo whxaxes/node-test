@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <p>
+        请求地址：
+        <input type="text" id="url" placeholder="输入接口名"/>
+    </p>
+    <p>
+        请求数据：
+        <textarea id="value" cols="30" rows="10" placeholder="若为post请求，则输入数据"></textarea>
+    </p>
+    <p>
+        请求结果：
+        <textarea id="result" cols="30" rows="10"></textarea>
+    </p>
+
+    <button class="pbtn">发送post请求</button>
+    <button class="gbtn">发送get请求</button>
+
+    <script src="/public/jquery-2.1.1.min.js"></script>
+    <script>
+        $(".pbtn").click(function(){
+            getdata('post')
+        });
+        $(".gbtn").click(function(){
+            getdata('get')
+        });
+
+        function getdata(method){
+            var data = {
+                method:method,
+                reqdata:$("#value").val().substring(0 , 200),
+                requrl:$("#url").val().substring(0 , 200)
+            }
+
+            $.ajax({
+                data:JSON.stringify(data),
+                url:"/tdata",
+                type:"post",
+                success:function(data){
+                    $("#result").val(JSON.stringify(data));
+                }
+            })
+        }
+    </script>
+</body>
+</html>

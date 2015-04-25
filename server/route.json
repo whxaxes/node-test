@@ -12,5 +12,9 @@
   "uindex":"url:upload/index.html",
   "upl":"url:upload/upload.html",
   "getProgress":"func:getProgress",
-  "upload":"func:upload"
+  "upload":"func:upload",
+
+//  transdata
+  "transdata":"url:transdata/request.html",
+  "tdata":"func:tdata"
 }
