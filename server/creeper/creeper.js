@@ -6,6 +6,7 @@ var http = require("http");
 var fs = require("fs");
 var path = require("path");
 var crypto = require("crypto");
+var transdata = require("transdata");
 
 var cheerio = require("cheerio");
 var ejs = require("ejs");
@@ -21,7 +22,7 @@ for(var k in source){
 var data = {};
 var noop = function(){};
 var isUpdate = false;//是否已经更新数据
-var updateTime = 0;//每天0点更新一次数据
+var updateTime = 8;//每天0点更新一次数据
 var updateJg = 60 * 60 * 1000;
 var transporter = nodemailer.createTransport(config.mail.from);
 
@@ -31,26 +32,14 @@ function catchData(id , callback){
 
     callback = callback || noop;
 
-    http.get(nowSource.url , function(res){
-        var size = 0;
-        var chunks = [];
+    transdata.get(nowSource.url , function(result){
+        result = nowSource.hanle(cheerio.load(result)).slice(0 , 10);
 
-        res.on('data' , function(chunk){
-            size += chunk.length;
-            chunks.push(chunk);
-        });
+        if(result.length){
+            data[id] = result;
+        }
 
-        res.on('end' , function(){
-            var result = Buffer.concat(chunks , size).toString();
-
-            result = nowSource.hanle(cheerio.load(result)).slice(0 , 10);
-
-            if(result.length){
-                data[id] = result;
-            }
-
-            callback();
-        });
+        callback();
     })
 }
 
@@ -123,12 +112,14 @@ function main(){
             }
 
             if(!err){
-                var oldmd5 = JSON.parse(str.toString());
+                var oldjson = JSON.parse(str.toString())
             }
 
-            if(err || oldmd5!==save.md5){
-                sendMail("每日博客", getHtml(data));
+            if(err || oldjson.md5!==save.md5){
+//                sendMail("每日博客", getHtml(data));
                 fs.writeFileSync(baseDir + 'result.txt' , JSON.stringify(save));
+            }else {
+                console.log("数据无更新")
             }
 
             data = {}

@@ -2,7 +2,7 @@
 
 String.prototype.trim = function(){
     return this.replace(/(^(\s+))|((\s+)$)/g, '');
-}
+};
 
 module.exports = {
     "AlloyTeam" : {
@@ -21,7 +21,7 @@ module.exports = {
                     title:$(this).find(".blogTitle").text().trim(),
                     time:time||""
                 })
-            })
+            });
             return result;
         }
     },
@@ -76,7 +76,7 @@ module.exports = {
                     title:$(this).find(".post-title").text(),
                     time:$(this).find(".post-date").text().trim().replace(/\//g , '-')
                 })
-            })
+            });
             return result;
         }
     },
@@ -97,7 +97,7 @@ module.exports = {
                     title:$(this).find(".entry-title").text(),
                     time:time||""
                 })
-            })
+            });
             return result;
         }
     }
