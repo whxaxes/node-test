@@ -1,0 +1,17 @@
+<%for(var k in data){%>
+<ul class="mb-nav" id="dom_<%= data[k].index%>">
+    <a href="" class="mb-blog-name"><%= k%></a>
+
+    <%for(var i=0;i<data[k].length;i++){%>
+    <li class="mb-item">
+        <a href="<%= data[k][i].url%>" target="_blank" class="mb-title" >
+            <%= data[k][i].title%>
+
+            <%if(data[k][i].time){%>
+            <span class="blog-time"><%= data[k][i].time%></span>
+            <%}%>
+        </a>
+    </li>
+    <%}%>
+</ul>
+<%}%>

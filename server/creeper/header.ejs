@@ -12,6 +12,9 @@
             list-style-type: none !important;
             font-family: "微软雅黑";
         }
+        .w-title{
+            margin:10px;
+        }
         .mb-nav{
             margin-bottom: 30px;
         }
@@ -53,26 +56,33 @@
             float: right;
         }
     </style>
+    <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+    <script>
+        if(!window.jQuery){document.write('<script src="/public/jquery-2.1.1.min.js"><\/script>');}
+    </script>
+    <script>
+        var sort = {};
+//        将dom按后台source的顺序放好
+        function loadHtml(number , id ,  html){
+            var $dom;
+
+            for(var k in sort){
+                if(number < k){
+                    $dom = sort[k];
+                    break;
+                }
+            }
+
+            if(!$dom){
+                $(".wrap").append(html);
+            }else {
+                $dom.before(html);
+            }
+
+            sort[number] = $("#"+id);
+        }
+    </script>
 </head>
 <body>
-    <div class="wrap">
-        <%for(var k in data){%>
-        <ul class="mb-nav">
-            <a href="" class="mb-blog-name"><%= k%></a>
-
-            <%for(var i=0;i<data[k].length;i++){%>
-            <li class="mb-item">
-                <a href="<%= data[k][i].url%>" target="_blank" class="mb-title" >
-                    <%= data[k][i].title%>
-
-                    <%if(data[k][i].time){%>
-                    <span class="blog-time"><%= data[k][i].time%></span>
-                    <%}%>
-                </a>
-            </li>
-            <%}%>
-        </ul>
-        <%}%>
-    </div>
-</body>
-</html>
+<div class="wrap">
+    <p class="w-title">抓取以下博客首页数据：<%= data.join(" , ")%></p>

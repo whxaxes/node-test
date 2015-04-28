@@ -8,7 +8,10 @@
         iframe{display: none;}
         .data img{max-width: 100%;}
     </style>
-    <script src="/public/jquery-2.1.1.min.js"></script>
+    <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+    <script>
+        if(!window.jQuery){document.write('<script src="/public/jquery-2.1.1.min.js"><\/script>');}
+    </script>
     <script>
         window.onload = function(){
             var frame = $("#upl")[0];
