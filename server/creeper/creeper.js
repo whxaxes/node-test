@@ -22,7 +22,7 @@ for(var k in source){
 var data = {};
 var noop = function(){};
 var isUpdate = false;//是否已经更新数据
-var updateTime = 8;//每天0点更新一次数据
+var updateTime = 0;//每天0点更新一次数据
 var updateJg = 60 * 60 * 1000;
 var transporter = nodemailer.createTransport(config.mail.from);
 
