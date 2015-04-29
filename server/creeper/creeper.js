@@ -26,15 +26,20 @@ var creeper = function(req , res , urlObj){
 
     var count = 0;
     for(var i=0;i<ids.length;i++){
-        !function(index){
+        (function(index){
             var id = ids[index];
             var nowSource = source[id];
             transdata.get(nowSource.url , function(result){
-                result = nowSource.hanle(cheerio.load(result));
-
                 count++;
-
                 console.log(">【"+id+ "】get√");
+
+                var $ = cheerio.load(result);
+                var $colum = $(nowSource.colum);
+
+                result = [];
+                $colum.each(function(){
+                    result.push(nowSource.handle($(this)))
+                });
 
                 if(result.length){
                     var data = {};
@@ -48,11 +53,10 @@ var creeper = function(req , res , urlObj){
 
                 if(count == ids.length){
                     console.log("数据采集完成..");
-                    res.write(foot);
-                    res.end();
+                    res.end(foot);
                 }
             })
-        }(i);
+        }(i))
     }
 };
 
