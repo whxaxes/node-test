@@ -58,8 +58,7 @@ var creeper = function(req , res , urlObj){
                 }
             } , function(err){
                 count++;
-                console.log(err.message);
-                console.log(">【"+id+ "】fail×");
+                console.log(">【"+id+ "】fail× ："+err.message);
 
                 if(count == ids.length){
                     console.log("数据采集完成..");
