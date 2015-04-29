@@ -10,7 +10,7 @@ module.exports = {
         colum:".articlemenu>li",
         handle:function($colum){
             try{
-                var time = $colum.find(".blogPs").text().match(/\d{4}[^x00-xff]{1}\d{1,2}[^x00-xff]{1}\d{1,2}/)[0].replace(/[^x00-xff]/g , '-');
+                var time = $colum.find(".blogPs").text().match(/\d{4}[^x00-xff]\d{1,2}[^x00-xff]\d{1,2}/)[0].replace(/[^x00-xff]/g , '-');
             }catch(e){}
             return {
                 url:$colum.find(".blogTitle").attr("href"),
@@ -25,9 +25,21 @@ module.exports = {
         colum:".container .post-list>li",
         handle:function($colum){
             return {
-                url:$colum.find("a").attr("href"),
+                url:this.url + $colum.find("a").attr("href"),
                 title:$colum.find("p").text(),
                 time:""
+            }
+        }
+    },
+
+    "w3cplus":{
+        url:"http://www.w3cplus.com/",
+        colum:".region-content .node-blog",
+        handle:function($colum){
+            return {
+                url:this.url + $colum.find("h1>a").attr("href"),
+                title:$colum.find("h1>a").text(),
+                time:$colum.find(".submitted").text().match(/\d{4}-\d{1,2}-\d{1,2}/)[0]
             }
         }
     },
@@ -49,12 +61,24 @@ module.exports = {
         colum:".site-content .post",
         handle:function($colum){
             try{
-                var time = $colum.find(".entry-date").text().match(/\d{4}[^x00-xff]{1}\d{1,2}[^x00-xff]{1}\d{1,2}/)[0].replace(/[^x00-xff]/g , '-')
+                var time = $colum.find(".entry-date").text().match(/\d{4}[^x00-xff]\d{1,2}[^x00-xff]\d{1,2}/)[0].replace(/[^x00-xff]/g , '-')
             }catch (e){}
             return {
                 url:$colum.find(".entry-title a").attr("href"),
                 title:$colum.find(".entry-title").text(),
                 time:time||""
+            }
+        }
+    },
+
+    "w3ctech":{
+        url:"http://www.w3ctech.com/",
+        colum:".bd_box .topic_list_content",
+        handle:function($colum){
+            return {
+                url:this.url + $colum.find(".topic_title a").attr("href"),
+                title:$colum.find(".topic_title a").text(),
+                time:""
             }
         }
     },

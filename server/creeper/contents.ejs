@@ -1,6 +1,6 @@
 <%for(var k in data){%>
 <ul class="mb-nav" id="dom_<%= data[k].index%>">
-    <a href="" class="mb-blog-name"><%= k%></a>
+    <a href="" class="mb-blog-name" id="<%= k%>"><%= k%></a>
 
     <%for(var i=0;i<data[k].length;i++){%>
     <li class="mb-item">

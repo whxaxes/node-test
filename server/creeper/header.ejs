@@ -5,16 +5,32 @@
     <title>抓取博客首页信息</title>
     <style>
         html,body{margin: 0;padding:0;}
-        .wrap{width: 100%;overflow: hidden;padding-bottom: 50px;}
+        *{font-family: "微软雅黑";}
+        .wrap{width: 100%;overflow: hidden;padding-bottom: 50px;padding-top: 30px;}
         ul, li {
             margin: 0;
             padding: 0;
             list-style-type: none !important;
-            font-family: "微软雅黑";
         }
         .w-title{
-            margin:10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            line-height: 30px;
+            background-color: #FFF;
+            z-index: 1000;
+            border-bottom: 1px solid #000;
+            margin: 0;
         }
+        .wt-c{
+            display: block;
+            margin:0 10px;
+        }
+        .w-title a:hover{
+            color: #F86143;
+        }
+
         .mb-nav{
             margin-bottom: 30px;
         }
@@ -24,16 +40,17 @@
             font-size: 20px;
             font-weight: bold;
         }
-
         .mb-item,.no-data{
             padding-left: 20px;
             -webkit-transition: background-color .3s;
+            transition: background-color .3s;
         }
         .mb-item:hover{
             background-color: #f86143;
         }
 
         a{
+            outline: none;
             color: #333;
             text-decoration: none !important;
         }
@@ -44,11 +61,14 @@
             line-height: 30px;
             -webkit-transition: -webkit-transform .3s;
             -webkit-transform: translate(0px, 0);
+            transition: transform .3s;
+            transform: translate(0px, 0);
         }
 
         .mb-item a:hover {
             color: #fff;
             -webkit-transform: translate(10px, 0);
+            transform: translate(10px, 0);
         }
 
         .blog-time {
@@ -84,8 +104,15 @@
     </script>
 </head>
 <body>
+<p class="w-title">
+    <span class="wt-c">
+        抓取到以下博客首页数据：
+        <%for(var j=0;j<data.length;j++){%>
+        <a href="#<%= data[j]%>"><%= data[j]%></a>&nbsp;&nbsp;
+        <%}%>
+    </span>
+</p>
 <div class="wrap">
-    <p class="w-title">抓取以下博客首页数据：<%= data.join(" , ")%></p>
     <!--<script>-->
         <!--$(".wrap").on('click' , 'a' , function(){-->
 

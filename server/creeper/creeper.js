@@ -40,6 +40,7 @@ var creeper = function(req , res , urlObj){
                 $colum.each(function(){
                     result.push(nowSource.handle($(this)))
                 });
+                if(typeof +nowSource.max == "number"){result = result.slice(0 , nowSource.max)}
 
                 if(result.length){
                     var data = {};
