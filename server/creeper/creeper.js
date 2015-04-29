@@ -56,6 +56,15 @@ var creeper = function(req , res , urlObj){
                     console.log("数据采集完成..");
                     res.end(foot);
                 }
+            } , function(err){
+                count++;
+                console.log(err.message);
+                console.log(">【"+id+ "】fail×");
+
+                if(count == ids.length){
+                    console.log("数据采集完成..");
+                    res.end(foot);
+                }
             })
         }(i))
     }
