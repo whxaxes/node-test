@@ -5,6 +5,18 @@ String.prototype.trim = function(){
 };
 
 module.exports = {
+    "w3ctech":{
+        url:"http://www.w3ctech.com/",
+        colum:".bd_box .topic_list_content",
+        handle:function($colum){
+            return {
+                url:this.url + $colum.find(".topic_title a").attr("href"),
+                title:$colum.find(".topic_title a").text(),
+                time:""
+            }
+        }
+    },
+
     "AlloyTeam" : {
         url:"http://www.alloyteam.com",
         colum:".articlemenu>li",
@@ -67,18 +79,6 @@ module.exports = {
                 url:$colum.find(".entry-title a").attr("href"),
                 title:$colum.find(".entry-title").text(),
                 time:time||""
-            }
-        }
-    },
-
-    "w3ctech":{
-        url:"http://www.w3ctech.com/",
-        colum:".bd_box .topic_list_content",
-        handle:function($colum){
-            return {
-                url:this.url + $colum.find(".topic_title a").attr("href"),
-                title:$colum.find(".topic_title a").text(),
-                time:""
             }
         }
     },

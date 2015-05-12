@@ -5,8 +5,7 @@ var path = require('path');
 var cheerio = require('cheerio');
 var baseDir = __dirname + PATH_LINE;
 
-module.exports = function(req , res , urlObj){
-    var pathname = urlObj.pathname;
+module.exports = function(req , res , pathname){
     var filename = pathname.substring(pathname.lastIndexOf("/")+1 , pathname.length);
 
     try{
