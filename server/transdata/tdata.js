@@ -1,6 +1,6 @@
 var transdata = require("transdata");
 
-module.exports = function(req , res , urlObj){
+module.exports = function(req , res){
     var size = 0;
     var chunks = [];
     req.on('data' , function(chunk){

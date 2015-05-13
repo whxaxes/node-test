@@ -14,7 +14,7 @@ for(var k in source){
     ids.push(k);
 }
 
-var creeper = function(req , res , urlObj){
+var creeper = function(req , res){
     var header = fs.readFileSync(baseDir + "header.ejs").toString();
     var contents = fs.readFileSync(baseDir + "contents.ejs").toString();
     var foot = fs.readFileSync(baseDir + "foot.ejs").toString();
