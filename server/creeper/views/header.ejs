@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>抓取博客首页信息</title>
+    <style>
+        html,body{margin: 0;padding:0;}
+        *{font-family: "微软雅黑";}
+        .wrap{width: 100%;overflow: hidden;padding-bottom: 50px;padding-top: 30px;}
+        ul, li {
+            margin: 0;
+            padding: 0;
+            list-style-type: none !important;
+        }
+
+        .mb-nav{
+            min-width:1000px;
+            margin-bottom: 30px;
+        }
+        .mb-blog-name {
+            display: block;
+            margin: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            -webkit-transition: color .3s;
+            transition: color .3s;
+        }
+        .mb-blog-name:hover{
+            color: #f86143;
+        }
+        .mb-item,.no-data{
+            padding-left: 20px;
+            -webkit-transition: background-color .3s;
+            transition: background-color .3s;
+        }
+        .mb-item:hover{
+            background-color: #f86143;
+        }
+
+        a{
+            outline: none;
+            color: #333;
+            text-decoration: none !important;
+        }
+
+        .mb-item a {
+            display: block;
+            margin-right: 20px;
+            line-height: 30px;
+            -webkit-transition: -webkit-transform .3s;
+            -webkit-transform: translate(0px, 0);
+            transition: transform .3s;
+            transform: translate(0px, 0);
+        }
+
+        .mb-item a:hover {
+            color: #fff;
+            -webkit-transform: translate(10px, 0);
+            transform: translate(10px, 0);
+        }
+
+        .blog-time {
+            font-size: 13px;
+            float: right;
+        }
+    </style>
+    <script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+    <script>
+        if(!window.jQuery){document.write('<script src="/public/jquery-2.1.1.min.js"><\/script>');}
+    </script>
+    <script>
+        var sort = {};
+//        将dom按后台source的顺序放好
+        function loadHtml(number , id ,  html){
+            var $dom;
+
+            for(var k in sort){
+                if(number < k){
+                    $dom = sort[k];
+                    break;
+                }
+            }
+
+            if(!$dom){
+                $(".wrap").append(html);
+            }else {
+                $dom.before(html);
+            }
+
+            sort[number] = $("#"+id);
+        }
+    </script>
+</head>
+<body>
+<div class="wrap">

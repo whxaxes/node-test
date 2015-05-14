@@ -8,37 +8,40 @@ var transdata = require("transdata");
 var cheerio = require("cheerio");
 var ejs = require("ejs");
 var source = require("./source");
+var EventEmitter = require("events").EventEmitter;
 
-var ids = [];
-for(var k in source){
-    ids.push(k);
-}
+var emitter = new EventEmitter;
+emitter.setMaxListeners(0);
+
+var header = fs.readFileSync(baseDir + "views/header.ejs").toString();
+var contents = fs.readFileSync(baseDir + "views/contents.ejs").toString();
+var foot = fs.readFileSync(baseDir + "views/foot.ejs").toString();
 
 var creeper = function(req , res){
-    var header = fs.readFileSync(baseDir + "header.ejs").toString();
-    var contents = fs.readFileSync(baseDir + "contents.ejs").toString();
-    var foot = fs.readFileSync(baseDir + "foot.ejs").toString();
-
     res.writeHead(200 , {'content-type':'text/html;charset=utf-8'});
-    res.write(ejs.render(header , {data:ids}));
+    res.write(header);
 
-    console.log("开始采集数据...");
-
+    console.log("采集数据...");
     var count = 0;
-    for(var i=0;i<ids.length;i++){
-        (function(index){
-            var id = ids[index];
-            var nowSource = source[id];
-            transdata.get(nowSource.url , function(result){
-                count++;
+    source.forEach(function(index , id){
+        var nowSource = this;
+
+        //将请求全部压入事件堆栈
+        emitter.once("event_"+index , function(msg , result){
+            count++;
+            if(msg == "error"){
+                console.log(">【"+id+ "】fail× ："+result.message);
+            }else {
                 console.log(">【"+id+ "】get√");
 
                 var $ = cheerio.load(result);
                 var $colum = $(nowSource.colum);
-
+                var list;
                 result = [];
                 $colum.each(function(){
-                    result.push(nowSource.handle($(this)))
+                    if(list = nowSource.handle($(this))){
+                        result.push(list)
+                    }
                 });
                 if(typeof +nowSource.max == "number"){result = result.slice(0 , nowSource.max)}
 
@@ -47,26 +50,31 @@ var creeper = function(req , res){
                     data[id] = result;
                     result.index = index;
 
-                    var html = ejs.render(contents , {data:data});
+                    var html = ejs.render(contents , {data:data , url:nowSource.url});
                     html = html.replace(/(\r|\n)\s*/g , '').replace(/'/g , "\\'");
                     res.write("<script>loadHtml("+index+" , 'dom_"+index+"' , '"+html+"')</script>");
                 }
+            }
 
-                if(count == ids.length){
-                    console.log("数据采集完成..");
-                    res.end(foot);
-                }
+            if(count == source.length){
+                console.log("数据采集完成..");
+                res.end(foot);
+            }
+        });
+
+        //如果正在加载数据时来了新请求则直接跳过，等此前的数据加载完毕后分发数据
+        if(!nowSource.isLoading){
+            nowSource.isLoading = true;
+
+            transdata.get(nowSource.url , function(result){
+                emitter.emit("event_"+index , 'success' , result);
+                nowSource.isLoading = false;
             } , function(err){
-                count++;
-                console.log(">【"+id+ "】fail× ："+err.message);
-
-                if(count == ids.length){
-                    console.log("数据采集完成..");
-                    res.end(foot);
-                }
+                emitter.emit("event_"+index , 'error' , err);
+                nowSource.isLoading = false;
             })
-        }(i))
-    }
+        }
+    });
 };
 
 module.exports = creeper;
