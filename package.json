@@ -5,7 +5,7 @@
   "main": "app.js",
   "dependencies": {
     "cheerio": "^0.19.0",
-    "easy-router": "^1.0.3",
+    "easy-router": "*",
     "ejs": "^2.3.1",
     "gulp": "^3.8.11",
     "gulp-livereload": "^3.8.0",

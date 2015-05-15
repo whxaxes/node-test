@@ -16,6 +16,7 @@ var getProgress = require('./upload/upload').getProgress;
 var upload = require('./upload/upload').upload;
 var creeper = require('./creeper/creeper');
 var tdata = require('./transdata/tdata');
+var websocket = require("./websocket/socket");
 
 //路由表
 var routerMaps = {
@@ -34,13 +35,17 @@ var routerMaps = {
     "getProgress": "func:getProgress",
     "upload": "func:upload",
 
+//    websocket
+    "ws":"func:socket",
+    "wsindex":"url:websocket/client.html",
+
 //    静态资源
     "/public/**/*":"url:"+STATIC_PATH+"**/*",
 
 //  transdata
     "transdata": "url:transdata/request.html",
     "tdata": "func:tdata"
-}
+};
 
 var router = Router(routerMaps);
 router.set('bigpipe' , bigpipe);
@@ -50,9 +55,13 @@ router.set('upload' , upload);
 router.set('creeper' , creeper);
 router.set('tdata' , tdata);
 
-http.createServer(function(req , res){
+router.set('socket' , websocket.handle);
+
+var server = http.createServer(function(req , res){
     router.route(req , res);
 }).listen(9030);
+
+websocket.update(server);
 
 console.log("服务启动成功...");
 

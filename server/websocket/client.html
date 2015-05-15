@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+<script>
+    var a = document.createElement("a");
+    a.href = window.location.href;
+    var host = a.hostname + ":" + a.port;
+    var socket = new WebSocket("ws://"+host+"/ws");
+
+    socket.onopen = function(){
+        console.log("open")
+
+        socket.send("我勒个大擦，大擦，，，，，");
+    };
+    socket.onmessage = function(data){
+        console.log(data)
+    };
+    socket.onclose = function(){
+        console.log("close")
+    };
+</script>
+</body>
+</html>
