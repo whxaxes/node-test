@@ -11,6 +11,8 @@ WebSocket.prototype.bind = function () {
         data = that.dataHandle(data);
 
         console.log("接受到的数据为：" + data);
+
+        that.send("连接成功");
     })
 };
 
@@ -23,26 +25,21 @@ WebSocket.prototype.getDataStat = function (data) {
 
     var dataLength, maskedData;
 
-    //如果为126，则后面16位长的数据为数据长度，如果为127，则后面32位长的数据为数据长度
+    //如果为126，则后面16位长的数据为数据长度，如果为127，则后面64位长的数据为数据长度
     if (secondByte == 126) {
         dataIndex += 2;
-        dataLength = data[2] + data[3];
+        dataLength = data.readUInt16BE(2);
     } else if (secondByte == 127) {
-        dataIndex += 4;
-        dataLength = data[2] + data[3] + data[4] + data[5];
+        dataIndex += 8;
+        dataLength = data.readUInt32BE(2) + data.readUInt32BE(6);
     } else {
         dataLength = secondByte;
     }
 
-    //如果有掩码，则获取masking key
+    //如果有掩码，则获取32位的二进制masking key，同时更新index
     if (hasMask) {
-        var i = dataIndex;
-        dataIndex += 4;    //如果有掩码，则有32位为masking key
-
-        maskedData = "";
-        for (; i < dataIndex; i++) {
-            maskedData += getBinary(data[i]);
-        }
+        maskedData = forMateBinary(data.readUInt32BE(dataIndex).toString(2));
+        dataIndex += 4;
     }
 
     //计算到此处时，dataIndex为数据位的起始位置，dataLength为数据长度，maskedData为二进制的解密数据
@@ -58,13 +55,11 @@ WebSocket.prototype.dataHandle = function (data) {
     var stat = this.getDataStat(data);
     var result;
     if (stat.maskedData) {
-        console.log('has masking key');
         result = [];
         var mi = 0;
         for (var i = stat.index; i < data.length; i++) {
-            var k = getBinary(data[i]);
+            var k = forMateBinary(data.readUInt8(i).toString(2));
             var b = "";
-
             //对数据进行解密，与masking key 进行异或运算
             for (var j = 0; j < 8; j++) {
                 var nm = stat.maskedData.charAt(mi);
@@ -75,8 +70,8 @@ WebSocket.prototype.dataHandle = function (data) {
             result.push("0x" + parseInt(b, 2).toString(16));
         }
         result = new Buffer(result);
+
     } else {
-        console.log('no masking key')
         result = data.slice(stat.index, data.length);
     }
 
@@ -84,32 +79,50 @@ WebSocket.prototype.dataHandle = function (data) {
 };
 
 WebSocket.prototype.send = function (message) {
-    //var buf = new Buffer(Buffer.byteLength(message));
-
-    //buf.write()
     var length = Buffer.byteLength(message);
-    var array = [];
 
-    array[0] = "0x" + parseInt("10000001" , 2).toString(16);
-    array[1] = "0x" + length.toString(16);
+//  数据的起始位置，如果数据长度16位也无法描述，则用64位，即8字节，如果16位能描述则用2字节，否则用第二个字节描述
+    var index = 2 + (length > 65535 ? 8 : (length > 125 ? 2 : 0));
+
+//  定义buffer，长度为描述字节长度 + message长度
+    var buffer = new Buffer(index + length);
+
+//    假设当前帧就是最后一帧
+    buffer[0] = parseInt("10000001" , 2);
+
+//    因为是由服务端发至客户端，所以无需masked掩码
+    if(length > 65535){
+        buffer[1] = 127;
+
+//        一般不会有太大的数据，此处直接用32位描述(因为buffer也只有写32位整型的方法)，其他置0
+        buffer.writeUInt32BE(0 , 2);
+        buffer.writeUInt32BE(length , 6);
+    }else if(length > 125){
+        buffer[1] = 126;
+
+        buffer.writeUInt16BE(length , 2);
+    }else {
+        buffer[1] = length;
+    }
+
+//    写入正文
+    buffer.write(message , index);
+
+    this.socket.write(buffer);
 };
 
-//将16进制转成2进制
-function getBinary(str) {
-    str = str.toString(2);
-    for (var k = 0; k < 8; k++) {
-        if (!str.charAt(k)) {
-            str = "0" + str;
+//补全8位二进制数前面省略的0
+function forMateBinary(data){
+    var m = 8 - data.length % 8;
+    if(m<8){
+        for (var z = 0; z < m; z++) {
+            data = "0"+data;
         }
     }
-    return str;
+    return data;
 }
 
 module.exports = {
-    handle: function (req, res, pathname) {
-
-    },
-
     update: function (server) {
         server.on('upgrade', function (req, socket, upgradeHead) {
             var head = new Buffer(upgradeHead.length);
@@ -124,11 +137,9 @@ module.exports = {
                 'Sec-WebSocket-Accept: ' + key
             ];
 
-            //socket.setNoDelay(true);
             socket.write(headers.join("\r\n") + "\r\n\r\n", 'ascii');
 
             new WebSocket(socket);
-            //ws.send("hello");
         });
     }
 };

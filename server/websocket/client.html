@@ -9,15 +9,15 @@
     var a = document.createElement("a");
     a.href = window.location.href;
     var host = a.hostname + ":" + a.port;
-    var socket = new WebSocket("ws://"+host+"/ws");
+    var socket = new WebSocket("ws://"+host+"/");
 
     socket.onopen = function(){
         console.log("open")
 
         socket.send("我勒个大擦，大擦，，，，，");
     };
-    socket.onmessage = function(data){
-        console.log(data)
+    socket.onmessage = function(e){
+        console.log(e.data)
     };
     socket.onclose = function(){
         console.log("close")
