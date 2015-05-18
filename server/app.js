@@ -61,7 +61,16 @@ var server = http.createServer(function(req , res){
     router.route(req , res);
 }).listen(9030);
 
-websocket.update(server);
+
+websocket.update(server , function(ws){
+    ws.on('close' , function(reason){
+        console.log("socket closed:"+reason);
+    });
+
+    ws.on('message' , function(data){
+        websocket.brocast(data);
+    });
+});
 
 console.log("服务启动成功...");
 

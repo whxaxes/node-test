@@ -5,23 +5,54 @@
     <title></title>
 </head>
 <body>
+<input type="text" placeholder="输入信息" id="myText" value="123"/>
+<button id="sendData">发送</button>
+
+<ul id="say-list">
+
+</ul>
+
 <script>
     var a = document.createElement("a");
     a.href = window.location.href;
     var host = a.hostname + ":" + a.port;
-    var socket = new WebSocket("ws://"+host+"/");
+    var ws = createWebsocket();
+    var isOK = false;
+    var ul = document.getElementById("say-list")
 
-    socket.onopen = function(){
-        console.log("open")
+    document.getElementById("sendData").onclick = function(){
+        if(isOK){
+            ws.send(document.getElementById("myText").value);
+            document.getElementById("myText").value = "";
+        }
+    };
 
-        socket.send("我勒个大擦，大擦，，，，，");
-    };
-    socket.onmessage = function(e){
-        console.log(e.data)
-    };
-    socket.onclose = function(){
-        console.log("close")
-    };
+    function createWebsocket(){
+        var ws = new WebSocket("ws://"+host+"/");
+
+        ws.onopen = function(){
+            console.log("open");
+            isOK = true;
+        };
+
+        ws.onmessage = function(e){
+            console.log(e.data);
+            var element = document.createElement("li");
+            var temp = new Date();
+            var regex = /\//g;
+            temp = (temp.toLocaleDateString() + ' ' + temp.toLocaleTimeString().slice(2)).replace(regex,'-')
+
+            element.innerHTML = temp + " : " + e.data;
+            ul.appendChild(element);
+        };
+
+        ws.onclose = function(){
+            console.log("close")
+            isOK = false;
+        };
+
+        return ws
+    }
 </script>
 </body>
 </html>
