@@ -12,7 +12,7 @@ function WebSocket(socket) {
     this.datas = [];
 
     this.bind();
-    //this.checkHeartBeat();
+    this.checkHeartBeat();
 }
 
 util.inherits(WebSocket, EventEmitter);
