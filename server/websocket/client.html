@@ -5,6 +5,7 @@
     <title></title>
 </head>
 <body>
+<p>当前在线人数：<span id="man">...</span></p>
 <input type="text" placeholder="输入信息" id="myText" value=""/>
 <button id="sendData">发送</button>
 
@@ -28,6 +29,7 @@
 
         var value = document.getElementById("myText").value;
         if(value.length){
+            console.log("发送"+value);
             ws.send(value);
         }else {
             alert("内容不能为空")
@@ -43,7 +45,11 @@
         };
 
         websocket.onmessage = function(e){
-            console.log(e.data);
+            if(e.data.indexOf("man:")>=0){
+                document.getElementById("man").innerHTML = e.data.split(":" , 2)[1];
+                return;
+            }
+
             var element = document.createElement("li");
             var temp = new Date();
             var regex = /\//g;

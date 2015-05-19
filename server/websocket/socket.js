@@ -130,7 +130,12 @@ WebSocket.prototype.close = function (reason) {
     this.state = "CLOSE";
     this.socket.destroy();
     var index = webSocketCollector.indexOf(this);
-    webSocketCollector.splice(index, 1);
+
+    if(index>=0){
+        webSocketCollector.splice(index, 1);
+
+        brocast("man:"+webSocketCollector.length);
+    }
 };
 
 //每隔10秒进行一次心跳检测，若连续发出三次心跳却没收到响应则关闭socket
@@ -195,17 +200,21 @@ WebSocket.prototype.send = function (message) {
     this.socket.write(buffer);
 };
 
+function brocast(msg){
+    webSocketCollector.forEach(function (ws) {
+        if (ws && ws.state == "OPEN") {
+            ws.send(msg);
+        }
+    })
+}
+
 module.exports = {
     getList: function () {
         return webSocketCollector.slice(0);
     },
 
     brocast: function (msg) {
-        webSocketCollector.forEach(function (ws) {
-            if (ws && ws.state == "OPEN") {
-                ws.send(msg);
-            }
-        })
+        brocast(msg)
     },
 
     update: function (server, callback) {
@@ -223,6 +232,8 @@ module.exports = {
 
             var ws = new WebSocket(socket);
             webSocketCollector.push(ws);
+
+            brocast("man:"+webSocketCollector.length);
             callback(ws);
         });
     }
