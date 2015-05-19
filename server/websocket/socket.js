@@ -22,6 +22,14 @@ WebSocket.prototype.bind = function () {
     this.socket.on('data', function (data) {
         that.dataHandle(data);
     });
+
+    this.socket.on('close', function (e) {
+        that.close(e);
+    });
+
+    this.socket.on('error', function (e) {
+        that.close(e);
+    });
 };
 
 //获取数据信息
@@ -61,7 +69,7 @@ WebSocket.prototype.handleDataStat = function (data) {
                 totalLength: dataLength,
                 length: dataLength,
                 maskedData: maskedData,
-                opcode: parseInt(data[0].toString(2).substring(4, 8), 2)   //获取第一个字节的opcode位
+                opcode: parseInt(data[0].toString(16).split("")[1] , 16)   //获取第一个字节的opcode位
             };
         }
     } else {
@@ -84,12 +92,11 @@ WebSocket.prototype.dataHandle = function (data) {
 
     var result;
     if (stat.maskedData) {
-        result = [];
-        for (var i = stat.index, mi = 0; i < data.length; i++, mi++) {
-            //对数据进行异或运算，然后转成16进制储存
-            result.push("0x" + (data[i] ^ stat.maskedData[mi % 4]).toString(16));
+        result = new Buffer(data.length-stat.index);
+        for (var i = stat.index, j = 0; i < data.length; i++, j++) {
+            //对每个字节进行异或运算，masked是4个字节，所以%4，借此循环
+            result[j] = data[i] ^ stat.maskedData[j % 4];
         }
-        result = new Buffer(result);
     } else {
         result = data.slice(stat.index, data.length);
     }
@@ -98,7 +105,7 @@ WebSocket.prototype.dataHandle = function (data) {
 
     stat.length -= (data.length - stat.index);
 
-    //当长度为0，则说明到了最后的数据
+    //当长度为0，说明当前帧为最后帧
     if (stat.length == 0) {
         var buf = Buffer.concat(this.datas, stat.totalLength);
 
@@ -168,12 +175,13 @@ WebSocket.prototype.send = function (message) {
     if (length > 65535) {
         buffer[1] = 127;
 
-//        一般不会有太大的数据，此处直接用32位描述(因为buffer也只有写32位整型的方法)，其他置0
+//      长度超过65535的则由8个字节表示，因为4个字节能表达的长度为4294967295，已经完全够用，因此直接将前面4个字节置0
         buffer.writeUInt32BE(0, 2);
         buffer.writeUInt32BE(length, 6);
     } else if (length > 125) {
         buffer[1] = 126;
 
+//      长度超过125的话就由2个字节表示
         buffer.writeUInt16BE(length, 2);
     } else {
         buffer[1] = length;
@@ -181,7 +189,6 @@ WebSocket.prototype.send = function (message) {
 
 //    写入正文
     buffer.write(message, index);
-
     this.socket.write(buffer);
 };
 
