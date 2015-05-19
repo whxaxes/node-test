@@ -5,7 +5,7 @@
     <title></title>
 </head>
 <body>
-<input type="text" placeholder="输入信息" id="myText" value="123"/>
+<input type="text" placeholder="输入信息" id="myText" value=""/>
 <button id="sendData">发送</button>
 
 <ul id="say-list">
@@ -18,24 +18,31 @@
     var host = a.hostname + ":" + a.port;
     var ws = createWebsocket();
     var isOK = false;
-    var ul = document.getElementById("say-list")
+    var ul = document.getElementById("say-list");
 
     document.getElementById("sendData").onclick = function(){
-        if(isOK){
-            ws.send(document.getElementById("myText").value);
-            document.getElementById("myText").value = "";
+        if(!isOK){
+            alert("websocket 断开了连接");
+            return;
+        }
+
+        var value = document.getElementById("myText").value;
+        if(value.length){
+            ws.send(value);
+        }else {
+            alert("内容不能为空")
         }
     };
 
     function createWebsocket(){
-        var ws = new WebSocket("ws://"+host+"/");
+        var websocket = new WebSocket("ws://"+host+"/");
 
-        ws.onopen = function(){
+        websocket.onopen = function(){
             console.log("open");
             isOK = true;
         };
 
-        ws.onmessage = function(e){
+        websocket.onmessage = function(e){
             console.log(e.data);
             var element = document.createElement("li");
             var temp = new Date();
@@ -46,12 +53,16 @@
             ul.appendChild(element);
         };
 
-        ws.onclose = function(){
-            console.log("close")
+        websocket.onclose = function(){
+            console.log("close");
             isOK = false;
+
+            setTimeout(function(){
+                ws = createWebsocket();
+            } , 2000);
         };
 
-        return ws
+        return websocket
     }
 </script>
 </body>

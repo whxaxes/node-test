@@ -160,7 +160,7 @@ WebSocket.prototype.sendPong = function () {
 
 //数据发送
 WebSocket.prototype.send = function (message) {
-    if(this.state !== "OPEN") return;
+    if(this.state !== "OPEN" && this.socket.writable) return;
 
     message = String(message);
     var length = Buffer.byteLength(message);
