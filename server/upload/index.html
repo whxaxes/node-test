@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1, target-densitydpi=medium-dpi, user-scalable=no">
-    <title>图片上传</title>
+    <title>Nodejs上传Demo</title>
     <style>
         iframe{display: none;}
         .data img{max-width: 100%;}
@@ -23,7 +23,7 @@
                 frameInit();
                 if($(cd).find("#path").length>0){
                     var path = $(cd).find("#path")[0].innerHTML;
-                    if(/png|gif|jpg/g.test(path)){
+                    if(/\.(png|gif|jpg)/i.test(path)){
                         $(".data").html("<img src='"+path+"'><br>")
                     }else {
                         $(".data").html("<a href='"+path+"' target='_blank'>"+path+"</a><br>")
@@ -64,7 +64,7 @@
                     dataType:"json",
                     success:function(data){
                         if(checking){
-                            $(".data").html("上传进度：" + (parseInt(100*data.now / data.all) || 0) + "%<br>上传速度："+(data.speed||(0+"KB/S")));
+                            $(".data").html("上传进度：" + (parseInt(100*data.now / data.size) || 0) + "%<br>上传速度："+(data.speed||(0+"KB/S")));
 
                             setTimeout(function(){getProgress();},200)
                         }

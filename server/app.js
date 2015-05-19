@@ -12,8 +12,7 @@ global.PATH_LINE = __dirname.match(/\/|\\/)[0];
 
 var bigpipe = require('./bigpipe/bigpipe');
 var pjax = require('./pjax/pjax');
-var getProgress = require('./upload/upload').getProgress;
-var upload = require('./upload/upload').upload;
+var upload = require('./upload/upload');
 var creeper = require('./creeper/creeper');
 var tdata = require('./transdata/tdata');
 var websocket = require("./websocket/socket");
@@ -30,10 +29,10 @@ var routerMaps = {
     "creeper": "func:creeper",
 
 //  upload file
-    "uindex": "url:upload/index.html",
     "upl": "url:upload/upload.html",
-    "getProgress": "func:getProgress",
-    "upload": "func:upload",
+    "uindex": "func:u_page",
+    "getProgress": "func:u_getProgress",
+    "upload": "func:u_upload",
 
 //    websocket
     "ws":"func:socket",
@@ -50,8 +49,11 @@ var routerMaps = {
 var router = Router(routerMaps);
 router.set('bigpipe' , bigpipe);
 router.set('pjax' , pjax);
-router.set('getProgress' , getProgress);
-router.set('upload' , upload);
+
+router.set('u_page' , upload.page);
+router.set('u_getProgress' , upload.getProgress);
+router.set('u_upload' , upload.upload);
+
 router.set('creeper' , creeper);
 router.set('tdata' , tdata);
 

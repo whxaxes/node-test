@@ -3,32 +3,72 @@
 var http = require('http');
 var fs = require('fs');
 var crypto = require("crypto");
+var del = require("del");
 
-var seesionMaps = {};
-var transformSpeed = 0;
+var sessionMaps = {};
 
 module.exports = {
     getProgress:getProgress,
 
+    page : page,
+
     upload:upload
 };
 
+//获取上传进度信息
 function getProgress(req , res){
-    if(req.symbolKey in seesionMaps){
-        seesionMaps[req.symbolKey].speed = transformSpeed;
-        res.end(JSON.stringify(seesionMaps[req.symbolKey]) || 0);
-    }else {
-        res.end('0');
-    }
+    var sessionMap = sessionMaps[getSymbol(req)];
+
+    res.end('{"now":"'+sessionMap.now+'" , "size":"'+sessionMap.size+'" , "speed":"'+sessionMap.speed+'"}');
 }
 
+//前往页面
+function page(req , res){
+    var symbol = getSymbol(req);
+
+    if(!(symbol in sessionMaps)){
+        sessionMaps[symbol] = {
+            now:0,
+            speed:0,
+            size:0,
+            file:""
+        }
+    }
+
+    this.routeTo(req , res , 'upload/index.html' , {
+        'Set-Cookie':'upload_id='+symbol
+    });
+}
+
+//解析cookie
+function parseCookie(cookie){
+    var cookieObj = {};
+
+    if(typeof cookie == "string"){
+        var array = cookie.split(";");
+        array.forEach(function(a , i){
+            var sa = a.split("=" , 2);
+            cookieObj[sa[0].trim()] = sa[1].trim()
+        });
+    }
+
+    return cookieObj;
+}
+
+//获取标记
+function getSymbol(req){
+    var cookie = parseCookie(req.headers['cookie']);
+    return cookie['upload_id'] || ~~(Math.random()*100000000);
+}
+
+//上传接口
 function upload(req , res){
-    var imgsays = [];
-    var num = 0;
-    var isStart = false;
-    var ws;
-    var filename;
-    var path;
+    var imgsays = [],
+        num = 0,
+        isStart = false;
+
+    var ws , filename , path;
+    var sessionMap = sessionMaps[getSymbol(req)];
 
     try{
         fs.statSync(STATIC_PATH + '/upload')
@@ -45,27 +85,24 @@ function upload(req , res){
         return;
     }
 
-    seesionMaps[req.symbolKey] = {
-        now:0,
-        all:fileSize
-    };
     var time = new Date();
+    sessionMap.size = fileSize;
 
     req.on('data' , function(chunk){
         var start = 0;
         var end = chunk.length;
         var rems = [];
 
-        seesionMaps[req.symbolKey].now+=chunk.length;
+        sessionMap.now+=chunk.length;
 
         var ntime = new Date();
         var speed = ~~(((chunk.length / 1024) / ((ntime - time) / 1000))+0.5);
         if(speed>0){
             if(speed <= 1024){
-                transformSpeed = speed + "KB/S";
+                sessionMap.speed = speed + "KB/S";
             }else {
                 speed = ~~(speed / 1024);
-                transformSpeed = speed + "MB/S";
+                sessionMap.speed = speed + "MB/S";
             }
         }
         time = ntime;
@@ -81,7 +118,7 @@ function upload(req , res){
 
                     var str = (new Buffer(imgsays)).toString();
                     filename = str.match(/filename=".*"/g)[0].split('"')[1];
-                    path = STATIC_PATH + '/upload/'+filename;
+                    path = STATIC_PATH + 'upload/'+filename;
                     ws = fs.createWriteStream(path);
 
                 }else if(i==chunk.length-2){    //说明到了数据尾部的\r\n
@@ -106,7 +143,13 @@ function upload(req , res){
         res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8'});
         res.end('<div id="path">/public/upload/'+filename+'</div>');
 
-        transformSpeed = 0;
-        delete seesionMaps[req.symbolKey];
+        if(fs.existsSync(sessionMap.file)){
+            fs.unlinkSync(sessionMap.file)
+        }
+
+        sessionMap.file = STATIC_PATH + 'upload/'+filename;
+        sessionMap.speed = 0;
+        sessionMap.size = 0;
+        sessionMap.now = 0;
     });
 }
