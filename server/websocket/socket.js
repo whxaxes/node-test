@@ -84,6 +84,7 @@ WebSocket.prototype.dataHandle = function (data) {
 
     if (!(stat = this.stat)) return;
 
+    //如果opcode为9，则发送pong响应，如果opcode为10则置pingtimes为0
     if (stat.opcode === 9 || stat.opcode === 10) {
         (stat.opcode === 9) ? (this.sendPong()) : (this.pingTimes = 0);
         this.reset();
@@ -159,6 +160,8 @@ WebSocket.prototype.sendPong = function () {
 
 //数据发送
 WebSocket.prototype.send = function (message) {
+    if(this.state !== "OPEN") return;
+
     message = String(message);
     var length = Buffer.byteLength(message);
 
