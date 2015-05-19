@@ -9,6 +9,6 @@ nodejs test demos
 
 [pushState + ajax = pjax](https://github.com/whxaxes/node-test/tree/master/server/pjax)：效果预览：[http://wanghx.cn:9030/pjax/pjax1.html](http://wanghx.cn:9030/pjax/pjax1.html)
 
-[图片上传预览及文件上传](https://github.com/whxaxes/node-test/tree/master/server/upload)
+[图片上传预览及文件上传](https://github.com/whxaxes/node-test/tree/master/server/upload)：效果预览：[http://wanghx.cn:9030/uindex](http://wanghx.cn:9030/uindex)
 
 [websocket实现，数据收发帧解析](https://github.com/whxaxes/node-test/tree/master/server/websocket)：效果预览：[http://wanghx.cn:9030/wsindex](http://wanghx.cn:9030/wsindex)
