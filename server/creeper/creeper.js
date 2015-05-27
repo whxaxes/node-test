@@ -30,7 +30,7 @@ emitter.setMaxListeners(0);
 //监听source文件改动，从而刷新引用的模块
 fs.watch(require.resolve("./source.js") , function(e , filename){
     if(e!=="change") return;
-    cleanCache(p);
+    cleanCache(require.resolve("./source.js"));
     source = require("./source");
 });
 

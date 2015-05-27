@@ -143,6 +143,30 @@ var sourceList = {
         }
     },
 
+    "Isux":{
+        url:"http://isux.tencent.com/",
+        colum:".list-wrap .column",
+        handle:function($colum){
+            return {
+                url:$colum.find(".img-wrap").attr("href"),
+                title:$colum.find(".btitle").text(),
+                time:""
+            }
+        }
+    },
+
+    "张鑫旭的博客":{
+        url:"http://www.zhangxinxu.com/wordpress/",
+        colum:".the_main .post",
+        handle:function($colum){
+            return {
+                url:$colum.find(".entry-title").attr("href"),
+                title:$colum.find(".entry-title").text(),
+                time:$colum.find(".date").text()
+            }
+        }
+    },
+
     "小胡子的博客":{
         url:"http://www.cnblogs.com/hustskyking/",
         colum:".post-list-item",
