@@ -6,6 +6,8 @@ String.prototype.trim = function(){
 
 var TIME_REG_1 = /\d{4}[^x00-xff]\d{1,2}[^x00-xff]\d{1,2}[^x00-xff]/;    //匹配XXXX年XX月XX日
 var TIME_REG_2 = /\d{4}-\d{1,2}-\d{1,2}/;        //匹配XXXX-XX-XX
+var TIME_REG_3 = /\d{4}\/\d{2}\/\d{2}/;        //匹配XXXX/XX/XX
+var TIME_REG_4 = /\d{4}\.\d{2}\.\d{2}/;        //匹配XXXX.XX.XX
 
 var sourceList = {
     "W3ctech":{
@@ -21,6 +23,45 @@ var sourceList = {
                 url:this.url + $colum.find(".topic_title a").attr("href"),
                 title:$colum.find(".topic_title a").text(),
                 time:(time instanceof Array)?time[0]:_time
+            }
+        }
+    },
+
+    "伯乐在线":{
+        url:"http://web.jobbole.com/all-posts/",
+        colum:".post",
+        handle:function($colum){
+            var time =$colum.find(".post-meta p").eq(0).text().match(TIME_REG_3);
+            return {
+                url:$colum.find(".meta-title").attr("href"),
+                title:$colum.find(".meta-title").text(),
+                time:(time instanceof Array)?time[0]:""
+            }
+        }
+    },
+
+    "COCOACHINA":{
+        url:"http://www.cocoachina.com/webapp/",
+        colum:".leftSide li",
+        handle:function($colum){
+            var time =$colum.text().match(TIME_REG_2);
+            return {
+                url:"http://www.cocoachina.com" + $colum.find(".newstitle a").attr("href"),
+                title:$colum.find(".newstitle a").text(),
+                time:(time instanceof Array)?time[0]:""
+            }
+        }
+    },
+
+    "阮一峰的js博文":{
+        url:"http://www.ruanyifeng.com/blog/javascript/",
+        colum:"#alpha .module-list-item",
+        handle:function($colum){
+            var time =$colum.find(".hint").text().match(TIME_REG_4);
+            return {
+                url:$colum.find("a").attr("href"),
+                title:$colum.find("a").text(),
+                time:(time instanceof Array)?time[0]:""
             }
         }
     },
@@ -146,7 +187,11 @@ var sourceList = {
 
 var source = {};
 var l = 0;
-for(var k in sourceList){l++}
+source.keys = [];
+for(var k in sourceList){
+    source.keys.push(k);
+    l++;
+}
 source.length = l;
 
 source.forEach = function(callback){

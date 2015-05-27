@@ -63,7 +63,6 @@ var server = http.createServer(function(req , res){
     router.route(req , res);
 }).listen(9030);
 
-
 websocket.update(server , function(ws){
     ws.on('close' , function(reason){
         console.log("socket closed:"+reason);

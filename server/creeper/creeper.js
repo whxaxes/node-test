@@ -3,32 +3,68 @@
 var baseDir = __dirname + PATH_LINE;
 
 var fs = require("fs");
+var path = require("path");
 var transdata = require("transdata");
 
 var cheerio = require("cheerio");
 var ejs = require("ejs");
 var source = require("./source");
 var EventEmitter = require("events").EventEmitter;
+var redis = require("redis");
+
+//连接redis
+var client = redis.createClient();
+var REDIS_OK = false;
+client.on("connect" , function(){
+    console.log("redis 连接成功")
+    REDIS_OK = true;
+}).on("error" , function(){
+    REDIS_OK = false;
+}).on("end" , function(){
+    REDIS_OK = false;
+});
 
 var emitter = new EventEmitter;
 emitter.setMaxListeners(0);
 
-var header = fs.readFileSync(baseDir + "views/header.ejs").toString();
-var contents = fs.readFileSync(baseDir + "views/contents.ejs").toString();
-var foot = fs.readFileSync(baseDir + "views/foot.ejs").toString();
+//监听source文件改动，从而刷新引用的模块
+fs.watch(require.resolve("./source.js") , function(e , filename){
+    if(e!=="change") return;
+    cleanCache(p);
+    source = require("./source");
+});
 
+//清除模块缓存
+function cleanCache(modulePath) {
+    var module = require.cache[modulePath];
+
+    if (module.parent) {
+        module.parent.children.splice(module.parent.children.indexOf(module), 1);
+    }
+
+    require.cache[modulePath] = null;
+}
+
+//处理爬取数据
 var creeper = function(req , res){
+    var header = fs.readFileSync(baseDir + "views/header.ejs").toString();
+    var contents = fs.readFileSync(baseDir + "views/contents.ejs").toString();
+    var foot = fs.readFileSync(baseDir + "views/foot.ejs").toString();
+
     res.writeHead(200 , {'content-type':'text/html;charset=utf-8'});
-    res.write(header);
+    res.write(ejs.render(header , {keys : source.keys}));
 
     console.log("采集数据...");
+
     var count = 0;
     source.forEach(function(index , id){
         var nowSource = this;
 
         //将请求全部压入事件堆栈
         emitter.once("event_"+index , function(msg , result){
+            nowSource.isLoading = false;
             count++;
+
             if(msg == "error"){
                 console.log(">【"+id+ "】fail× ："+result.message);
             }else {
@@ -66,12 +102,38 @@ var creeper = function(req , res){
         if(!nowSource.isLoading){
             nowSource.isLoading = true;
 
+            if(!REDIS_OK){
+                requestData();
+                return;
+            }
+
+            //把数据存储到redis，数据将在一个小时候过期
+            client.hgetall(nowSource.url , function(err , obj){
+                var time = +(new Date());
+                if(err){
+                    requestData();
+                    return;
+                }
+
+                if (!obj || (obj && ((time - obj.time) >= 60 * 60 * 1000))) {
+                    requestData();
+                }else {
+                    emitter.emit("event_"+index , 'success' , obj.html);
+                }
+            });
+        }
+
+        function requestData(){
             transdata.get(nowSource.url , function(result){
+                if(REDIS_OK){
+                    client.hmset(nowSource.url , {
+                        time : +(new Date()),
+                        html : result
+                    });
+                }
                 emitter.emit("event_"+index , 'success' , result);
-                nowSource.isLoading = false;
             } , function(err){
                 emitter.emit("event_"+index , 'error' , err);
-                nowSource.isLoading = false;
             })
         }
     });
