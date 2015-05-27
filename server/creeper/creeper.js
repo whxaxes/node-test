@@ -15,8 +15,9 @@ var redis = require("redis");
 //连接redis
 var client = redis.createClient();
 var REDIS_OK = false;
+
 client.on("connect" , function(){
-    console.log("redis 连接成功")
+    console.log("redis 连接成功");
     REDIS_OK = true;
 }).on("error" , function(){
     REDIS_OK = false;
