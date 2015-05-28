@@ -5,6 +5,7 @@ var baseDir = __dirname + PATH_LINE;
 var fs = require("fs");
 var path = require("path");
 var transdata = require("transdata");
+var router = require("easy-router")();
 
 var cheerio = require("cheerio");
 var ejs = require("ejs");
@@ -140,4 +141,5 @@ var creeper = function(req , res){
     });
 };
 
-module.exports = creeper;
+router.setMap({"creeper": "func:creeper"});
+router.set("creeper" , creeper);
