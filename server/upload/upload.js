@@ -4,19 +4,20 @@ var http = require('http');
 var fs = require('fs');
 var crypto = require("crypto");
 var del = require("del");
+var router = require("easy-router")();
 
 var sessionMaps = {};
 
-module.exports = {
-    getProgress:getProgress,
-
-    page : page,
-
-    upload:upload
-};
+router.setMap({
+    "upl": "url:upload/upload.html",
+    "uindex": page,
+    "getProgress": getProgress,
+    "upload": upload
+});
 
 //获取上传进度信息
 function getProgress(req , res){
+    console.log(getSymbol(req))
     var sessionMap = sessionMaps[getSymbol(req)];
 
     res.end('{"now":"'+sessionMap.now+'" , "size":"'+sessionMap.size+'" , "speed":"'+sessionMap.speed+'"}');
@@ -35,7 +36,7 @@ function page(req , res){
         }
     }
 
-    this.routeTo(req , res , 'upload/index.html' , {
+    router.routeTo(req , res , 'upload/index.html' , {
         'Set-Cookie':'upload_id='+symbol
     });
 }

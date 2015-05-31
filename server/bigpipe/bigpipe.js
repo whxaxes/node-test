@@ -1,5 +1,7 @@
 var fs = require('fs');
-module.exports = function(req , res){
+var router = require('easy-router')();
+
+router.setMap({"bigpipe": function(req , res){
     //bigpipe测试
     res.writeHead(200 , {'Content-Type': 'text/html;charset=utf-8'});
 
@@ -28,4 +30,4 @@ module.exports = function(req , res){
             flush();
         },1000)
     }
-}
+}});

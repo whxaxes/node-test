@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>题目6</title>
+    <style>
+        * {margin: 0;padding: 0}
+        body {overflow: hidden;}
+        form {width: 380px;margin: 20px auto;}
+        table {width: 700px}
+        table input {width: 210px;height: 30px;line-height: 25px;padding: 0 5px;border: 1px solid #666;color: #333;outline: none;}
+        .label {width: 90px;color: #333;}
+        .input {width: 240px;}
+        .tips {font-size: 13px;color: #aaa}
+        td {padding: 5px 0;}
+        p {text-align: center;}
+        p button {width: 100px;height: 40px;line-height: 40px;text-align: center;margin: 10px 4px 0 0;}
+    </style>
+</head>
+<body>
+<form action="/sub" method="get">
+    <table class="register" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+            <td class="label">*昵称:</td>
+            <td class="input"><input type="text" name="nickname" id="nickname"/></td>
+            <td class="tips">昵称为1~30个字符</td>
+        </tr>
+        <tr>
+            <td class="label">*账号:</td>
+            <td class="input"><input type="text" name="username" id="username"/></td>
+            <td class="tips">账号为6~18个字符，只允许英文、数字和下划线</td>
+        </tr>
+        <tr>
+            <td class="label">*密码:</td>
+            <td class="input"><input type="password" name="password" id="password"/></td>
+            <td class="tips">密码范围在6~16位之间</td>
+        </tr>
+        <tr>
+            <td class="label">*确认密码:</td>
+            <td class="input"><input type="password" name="password_2" id="password_2"/></td>
+            <td class="tips">两次输入密码需一致</td>
+        </tr>
+        <tr>
+            <td class="label">邮箱:</td>
+            <td class="input"><input type="text" name="email" id="email"/></td>
+            <td class="tips">您的个人邮箱</td>
+        </tr>
+        <tr>
+            <td class="label">个人网站:</td>
+            <td class="input"><input type="text" name="url" id="url"/></td>
+            <td class="tips">您的个人网站链接</td>
+        </tr>
+    </table>
+    <p><button type="submit" id="submit">注册</button></p>
+</form>
+
+<script>
+    if (!('trim' in String)) {
+        String.prototype.trim = function () {
+            return this.replace(/^\s+|\s+$/g, '');
+        }
+    }
+
+    //    简易事件绑定发射器
+    function EventEmitter() {
+        this.eventList = {};
+    }
+    var Ep = EventEmitter.prototype;
+    //绑定事件
+    Ep.on = function (name, func) {
+        if (!(func instanceof Function))return;
+
+        name = name + "";
+
+        this.eventList[name] = this.eventList[name] || [];
+        this.eventList[name].push(func);
+    };
+    //解绑事件
+    Ep.unon = function (name, func) {
+        if (!(func instanceof Function))return;
+
+        name = name + "";
+        if (!(name in this.eventList))return;
+
+        var funcs = this.eventList[name];
+        for (var i = 0; i < funcs.length; i++) {
+            if (func == funcs[i]) {
+                funcs.splice(i, 1);
+                break;
+            }
+        }
+    };
+    //分发事件
+    Ep.emit = function (name) {
+        name = name + "";
+        if (!(name in this.eventList))return;
+
+        var funcs = this.eventList[name];
+        for (var i = 0; i < funcs.length; i++) {
+            funcs[i].apply(this, Array.prototype.slice.call(arguments, 1, arguments.length));
+        }
+    };
+
+    //    表单验证组件类
+    function Validate(options) {
+        this.extend(options);
+        this.init();
+        EventEmitter.call(this);
+    }
+
+    //    进行简易的继承事件类
+    Validate.prototype = new EventEmitter();
+
+    var Vp = Validate.prototype;
+
+    //    将传入的参数转为对象属性
+    Vp.extend = function (t, o) {
+        if (arguments.length == 1) {
+            o = t;
+            t = this;
+        }
+
+        for (var k in o) {
+            if (typeof o[k] !== "object" || o[k].nodeType) {
+                t[k] = o[k];
+                continue;
+            }
+
+            if (o[k] instanceof Array) {
+                t[k] = o[k].slice(0);
+                continue;
+            }
+
+            this.extend(t[k] = {}, o[k]);
+        }
+    };
+
+//    兼容IE的事件绑定
+    Vp.addEvent = function(ele , ev , func){
+        if (!ele.nodeType || typeof ev !== "string" || !(func instanceof Function))return;
+
+        if('addEventListener' in ele){
+            ele.addEventListener(ev , function(){
+                func.apply(ele , arguments);
+            })
+        }else {
+            ele.attachEvent("on"+ev , function(){
+                func.apply(ele , arguments);
+            })
+        }
+    };
+
+    Vp.init = function () {
+        var that = this;
+        this.form.onsubmit = function(){
+            for (var k in that.rules) {
+                if (!that.check(k))return false;
+            }
+
+            alert("注册成功");
+
+    //            只为了看效果不让页面跳转，所以直接返回false
+            return false;
+        };
+
+        var ele;
+        for (var k in this.rules) {
+            ele = dom("#"+k);
+
+            if(ele.nodeType){
+    //                当输入框被focus时分发focus事件
+                this.addEvent(ele , 'focus' , function(){
+                    that.emit('focus' , this);
+                });
+
+    //                当输入失去焦点，分发blur，并且传入有无经常格式检查
+                this.addEvent(ele , 'blur' , function(){
+                    var result = that.check(this);
+                    that.emit('blur' , this , result);
+                });
+            }
+        }
+    };
+
+    Vp.check = function (id) {
+        var ele = id.nodeType ? id : dom("#" + id);
+        id = id.nodeType ? id.id : id;
+
+        var rule = this.rules[id];
+        var mess = this.message[id];
+        var msg;
+        if (rule) {
+            var value = ele.value.trim();
+            if (rule.required && value.length === 0) {
+                msg = mess ? (mess.required || "") : "";
+                this.emit("error", ele, msg || "不能为空");
+                return false;
+            }
+
+            if (rule.minlength && value.length < rule.minlength) {
+                msg = mess ? (mess.minlength || "") : "";
+                this.emit("error", ele, msg || "最少"+rule.minlength+"个字符");
+                return false;
+            }
+
+            if (rule.maxlength && value.length > rule.maxlength) {
+                msg = mess ? (mess.maxlength || "") : "";
+                this.emit("error", ele, msg || "最多"+rule.maxlength+"个字符");
+                return false;
+            }
+
+            if (rule.equal) {
+                var eqdom = dom(rule.equal);
+
+                if (!eqdom.nodeType || value !== eqdom.value) {
+                    msg = mess ? (mess.equal || "") : "";
+                    this.emit("error", ele, msg);
+                    return false;
+                }
+            }
+
+            if(rule.type || rule.reg){
+                var reg;
+    //              根据type提供四种种正则，匹配用户名、密码、邮箱和url
+                switch (rule.type){
+                    case "username":
+                        reg = /^[\da-zA-Z_]+$/g;
+                        break;
+                    case "password":
+                        reg = /^[\da-zA-Z_.~@!$^#%*&+-]+$/g;
+                        break;
+                    case "email":
+                        reg = /^[\da-zA-Z_.\-]+@[\da-zA-Z]+\.[a-zA-Z]{2,4}$/g;
+                        break;
+                    case "url":
+                        reg = /^https?\:\/\/[\da-zA-Z.:]+(\/[\da-zA-Z_.-]+)+\/?$/g;
+                        break;
+                    default :break;
+                }
+
+    //              如果用户设置了正则，则使用用户设置的正则
+                reg = rule.reg ? rule.reg : reg;
+
+                if(value.length > 0 && (!reg || !(reg instanceof RegExp) || !reg.test(value))){
+                    msg = mess ? (mess.formate || "") : "";
+                    this.emit("error", ele, msg||"格式错误");
+                    return false;
+                }
+            }
+
+            if(value.length > 0) this.emit("success", ele);
+
+            return true;
+        } else {
+            return true;
+        }
+    };
+
+    //    简易选择器，传入的参数只能为单个id或class或类名
+    function dom(selector) {
+        selector = selector.replace(/\s/g, '');
+
+        var symbol = selector.charAt(0);
+        if (symbol == "#") {
+            return document.getElementById(selector.replace(/#/g, ''))
+        } else if (symbol == ".") {
+            var collector = [];
+            var elements = document.getElementsByTagName("*");
+            var classReg = new RegExp('\\b' + selector.replace(/\./g, '') + '\\b', 'g');
+            for (var i = 0; i < elements.length; i++) {
+                if (classReg.test(elements[i].className)) {
+                    collector.push(elements[i])
+                }
+                classReg.lastIndex = 0;
+            }
+            return collector;
+        } else {
+            return document.getElementsByTagName(selector);
+        }
+    }
+
+    //    实例化组件，传入相应参数
+    var validate = new Validate({
+        form: dom("form")[0],
+
+        rules: {
+            nickname: {
+                required: true,
+                maxlength: 30
+            },
+            username: {
+                type: "username",
+                required: true,
+                minlength: 6,
+                maxlength: 18
+            },
+            password: {
+                type: "password",
+                required: true,
+                minlength: 6,
+                maxlength: 16
+            },
+            password_2: {
+                type: "password",
+                required: true,
+                equal:"#password"
+            },
+            email:{
+                type: "email"
+            },
+            url:{
+                type: "url"
+            }
+        },
+
+        message: {
+            nickname: {
+                required: "昵称不能为空"
+            },
+            username: {
+                required: "账号不能为空",
+                formate : "用户名格式错误，只允许英文、数字和下划线"
+            },
+            password: {
+                required: "密码不能为空"
+            },
+            password_2: {
+                required: "请确认密码",
+                equal: "两次输入密码不相同"
+            },
+            email:{
+                formate : "邮箱格式错误"
+            },
+            url:{
+                formate : "网址格式错误"
+            }
+        }
+    });
+
+    //    当输入框focus时，将输入框状态还原
+    validate.on("focus" , function(input){
+        var tips = input.parentNode.nextSibling;
+        if(!tips.tagName){
+            tips = tips.nextSibling;
+        }
+        if(tips.getAttribute("data-tips")){
+            input.style.borderColor = "#666";
+            tips.style.color = "#aaa";
+            tips.innerHTML = tips.getAttribute("data-tips");
+        }
+    });
+
+    //    当输入框没有通过检查触发该事件
+    validate.on("error", function (input, message) {
+        var tips = input.parentNode.nextSibling;
+        if(!tips.tagName){
+            tips = tips.nextSibling;
+        }
+        if(!tips.getAttribute("data-tips")){
+            tips.setAttribute("data-tips" , tips.innerHTML)
+        }
+        input.style.borderColor = "#f00";
+        tips.style.color = "#f00";
+        tips.innerHTML = message;
+    });
+
+    //    当输入框通过检查时触发该事件
+    validate.on("success", function (input) {
+        var tips = input.parentNode.nextSibling;
+        if(!tips.tagName){
+            tips = tips.nextSibling;
+        }
+        if(!tips.getAttribute("data-tips")){
+            tips.setAttribute("data-tips" , tips.innerHTML)
+        }
+        input.style.borderColor = "#71B83D";
+        tips.style.color = "#71B83D";
+        tips.innerHTML = "填写正确";
+    });
+</script>
+
+</body>
+</html>

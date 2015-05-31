@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>题目2</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            -moz-user-select: none;
+        }
+
+        table {
+            cursor: pointer;
+        }
+
+        #move-rect {
+            position: absolute;
+            background-color: #89C6FC;
+            opacity: .5;
+            filter: alpha(opacity=50);
+        }
+
+        table {
+            border: 1px solid #999;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: #C1E0FC;
+        }
+        th, td {
+            border: 1px solid #999;
+            text-align: center;
+            padding: 5px;
+        }
+        p{text-align: center;}
+    </style>
+</head>
+<body>
+<table cellpadding="0" cellspacing="0" id="table"></table>
+<div id="move-rect" style="top: 0px;left: 0px;"></div>
+<p>tips:点击头部进行从大到小排序，再次点击进行从小到大排序</p>
+<p>拖动表格的列能进行拖动</p>
+<script>
+    var data = [
+        ["序号", "名额", "数量", "单价(Q点)", "总计(Q点)"],
+        [1, "农场化肥A", 2, 50, 100],
+        [2, "飞车道具C", 1, 80, 80],
+        [3, "空间装扮K", 1, 120, 120],
+        [4, "农场狗粮C", 4, 60, 240],
+        [5, "音速种子", 2, 110, 220],
+        [6, "农场化肥D", 5, 60, 300],
+        [7, "AVA装扮C", 1, 300, 300],
+        [8, "三国道具C", 15, 60, 900],
+        [9, "DNF道具B", 4, 300, 1200],
+        [10, "农场化肥H", 6, 20, 120],
+        [11, "农场化肥B", 1, 80, 80],
+        [12, "Q宠元宝", 100, 1, 100],
+        [13, "三国道具K", 9, 20, 190]
+    ];
+
+    var table = document.getElementById("table");
+    var moveRect = document.getElementById("move-rect");
+    moveRect.style.display = "none";
+    var timeout;
+
+    render(data);
+
+    //    拖动更换事件绑定
+    var body = document.body;
+    body.onmousedown = function (e) {
+        e = e || window.event;
+
+        if(e.button == 2)return false;
+
+        var target = e.target || e.srcElement;
+        if (!/th|td/i.test(target.tagName)) return;
+
+        var index = getIndex(target.parentNode.childNodes, target);
+        var ths = table.getElementsByTagName("th");
+
+        var x = e.clientX;
+        var y = e.clientY;
+        var l = ths[index].offsetLeft + table.offsetLeft;
+        var t = table.offsetTop;
+        moveRect.style.width = target.offsetWidth + "px";
+        moveRect.style.height = table.offsetHeight + "px";
+        moveRect.style.left = l + "px";
+        moveRect.style.top = t + "px";
+
+        timeout = setTimeout(function () {
+            body.onmousemove = function (e) {
+                e = e || window.event;
+                moveRect.style.display = "block";
+
+                l += (e.clientX - x);
+                t += (e.clientY - y);
+                moveRect.style.left = l + "px";
+                moveRect.style.top = t + "px";
+                x = e.clientX;
+                y = e.clientY;
+            };
+        }, target.tagName == "TH" ? 100 : 0);
+
+        body.onmouseup = function (e) {
+            e = e || window.event;
+            clearTimeout(timeout);
+
+//            如果未触发移动，则当作单击，而且单机的目标如果是th，则进行排序
+            if (moveRect.style.display == "none" && target.tagName == "TH") {
+                var ay = data[0][index].split(":");
+                var isforward = /\bforward\b/g.test(ay[1]);
+                data.quickSort(index, 1, data.length - 1, isforward);
+                data[0][index] = ay[0] + ":" + (isforward ? "reverse" : "forward");
+                render(data);
+            } else {
+                moveRect.style.display = "none";
+            }
+
+//            获取移动块到达的位置，获取插入位置
+            var nx = e.clientX;
+            for (var i = 0; i < ths.length; i++) {
+                var nl = ths[i].offsetLeft + table.offsetLeft;
+                if (nx >= nl && nx <= (nl + ths[i].offsetWidth)) {
+                    for (var j = 0; j < data.length; j++) {
+                        data[j].changeIndex(index, i);
+                    }
+                    render(data);
+                    break;
+                }
+            }
+
+//            删除事件绑定
+            this.onmousemove = null;
+            this.onmouseup = null;
+        };
+    };
+
+    //    阻止浏览器选取事件
+    document.onselectstart = function (e) {
+        return false;
+    };
+
+    //    获取某个元素在兄弟中的index
+    function getIndex(list, item) {
+        if ("indexOf" in list) return list.indexOf(item);
+
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] == item) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    //    更换数组里的元素顺序
+    Array.prototype.changeIndex = function (from, to) {
+        if (from == to) return;
+
+        var ele = this.splice(from, 1);
+        this.splice(to, 0, ele[0]);
+    };
+
+    //    定制版快速排序,direction为true则为从小到达排序，否则从大到小排序
+    Array.prototype.quickSort = function (index, start, end, direction) {
+        quickSort.call(this, index, start, end);
+
+        function quickSort(index, start, end) {
+            //key是分割线
+            var i = start, j = end, key = this[start][index];
+            var md, a, b;
+            while (i < j) {
+                while (i < j) {
+                    a = this[j][index];
+                    b = this[i][index];
+                    if ((direction ? a <= key : a >= key) && (direction ? a < b : a > b)) {
+                        md = this[i];
+                        this[i] = this[j];
+                        this[j] = md;
+                        break;
+                    }
+                    j--;
+                }
+                while (i < j) {
+                    a = this[j][index];
+                    b = this[i][index];
+                    if ((direction ? b >= key : b <= key) && (direction ? a < b : a > b)) {
+                        md = this[i];
+                        this[i] = this[j];
+                        this[j] = md;
+                        break;
+                    }
+                    i++;
+                }
+            }
+
+            if (i - start > 1) {            //对key左边的数据进行递归排序
+                quickSort.call(this, index, start, i - 1)
+            }
+            if (end - i > 1) {            //对key右边的数据进行递归排序
+                quickSort.call(this, index, i + 1, end)
+            }
+        }
+    };
+
+    //    渲染表格
+    function render(data) {
+        var html = "", ele = "";
+        var thclass,thvalue;
+        for (var i = 0; i < data.length; i++) {
+            html += "<tr>";
+            ele = (i == 0) ? "th" : "td";
+            for (var j = 0; j < data[i].length; j++) {
+                if(i == 0){
+                    if(data[i][j].indexOf(":")==-1){
+                        thclass = "forward";
+                        thvalue = data[i][j];
+                        data[i][j] += ":"+thclass;
+                    }else {
+                        thvalue = data[i][j].split(":")[0];
+                        thclass = data[i][j].split(":")[1];
+                    }
+                    html += "<th class='"+thclass+"'>" + thvalue + "</th>";
+                }else {
+                    html += "<td>" + data[i][j] + "</td>";
+                }
+            }
+            html += "</tr>"
+        }
+
+        try {
+            table.innerHTML = html;
+        } catch (e) {
+            var div = document.createElement("div");
+            div.innerHTML = '<table>' + html + '</table>';
+            table.replaceChild(div.firstChild.firstChild, table.firstChild);
+        }
+    }
+</script>
+</body>
+</html>
