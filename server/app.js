@@ -10,7 +10,7 @@ global.STATIC_PATH = "../public/";
 global.PATH_LINE = __dirname.match(/\/|\\/)[0];
 
 var router = require('easy-router')({
-    "/topic/*":"url:./txwork/topic_*.html",
+    "/topic/*":"url:"+STATIC_PATH+"txwork/topic_*.html",
 
     "/public/**/*":"url:"+STATIC_PATH+"**/*"        //静态资源
 });
