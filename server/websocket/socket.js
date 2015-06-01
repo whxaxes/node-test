@@ -5,9 +5,7 @@ var EventEmitter = require("events").EventEmitter;
 var router = require("easy-router");
 var webSocketCollector = [];
 
-router.setMap({
-    "wsindex":"websocket/client.html"
-});
+router.setMap("wsindex" , "websocket/client.html");
 
 function WebSocket(socket) {
     this.state = "OPEN";

@@ -1,7 +1,7 @@
 var fs = require('fs');
 var router = require('easy-router');
 
-router.setMap({"bigpipe": function(req , res){
+router.setMap("bigpipe" , function(req , res){
     //bigpipe测试
     res.writeHead(200 , {'Content-Type': 'text/html;charset=utf-8'});
 
@@ -30,4 +30,4 @@ router.setMap({"bigpipe": function(req , res){
             flush();
         },1000)
     }
-}});
+});

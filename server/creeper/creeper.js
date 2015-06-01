@@ -141,4 +141,4 @@ var creeper = function(req , res){
     });
 };
 
-router.setMap({"creeper": creeper});
+router.setMap("creeper",creeper);
