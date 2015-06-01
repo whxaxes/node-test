@@ -3,7 +3,7 @@
 var fs = require('fs');
 var path = require('path');
 var cheerio = require('cheerio');
-var router = require("easy-router")();
+var router = require("easy-router");
 var baseDir = __dirname + PATH_LINE;
 
 router.setMap({

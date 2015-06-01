@@ -2,11 +2,11 @@
 var crypto = require("crypto");
 var util = require("util");
 var EventEmitter = require("events").EventEmitter;
-var router = require("easy-router")();
+var router = require("easy-router");
 var webSocketCollector = [];
 
 router.setMap({
-    "wsindex":"url:websocket/client.html"
+    "wsindex":"websocket/client.html"
 });
 
 function WebSocket(socket) {

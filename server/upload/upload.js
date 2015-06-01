@@ -4,12 +4,12 @@ var http = require('http');
 var fs = require('fs');
 var crypto = require("crypto");
 var del = require("del");
-var router = require("easy-router")();
+var router = require("easy-router");
 
 var sessionMaps = {};
 
 router.setMap({
-    "upl": "url:upload/upload.html",
+    "upl": "upload/upload.html",
     "uindex": page,
     "getProgress": getProgress,
     "upload": upload

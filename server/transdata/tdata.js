@@ -1,8 +1,8 @@
 var transdata = require("transdata");
-var router = require("easy-router")();
+var router = require("easy-router");
 
 router.setMap({
-    "transdata": "url:transdata/request.html",
+    "transdata": "transdata/request.html",
 
     "tdata": function(req , res){
         var size = 0;

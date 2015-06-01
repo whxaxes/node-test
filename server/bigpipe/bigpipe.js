@@ -1,5 +1,5 @@
 var fs = require('fs');
-var router = require('easy-router')();
+var router = require('easy-router');
 
 router.setMap({"bigpipe": function(req , res){
     //bigpipe测试

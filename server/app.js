@@ -9,10 +9,12 @@ var crypto = require('crypto');
 global.STATIC_PATH = "../public/";
 global.PATH_LINE = __dirname.match(/\/|\\/)[0];
 
-var router = require('easy-router')({
-    "/topic/*":"url:"+STATIC_PATH+"txwork/topic_*.html",
+var router = require('easy-router');
 
-    "/public/**/*":"url:"+STATIC_PATH+"**/*"        //静态资源
+router.setMap({
+    "/topic/*":STATIC_PATH+"txwork/topic_*.html",
+
+    "/public/**/*":STATIC_PATH+"**/*"        //静态资源
 });
 
 require('./bigpipe/bigpipe');
@@ -21,6 +23,7 @@ require('./upload/upload');
 require('./pjax/pjax');
 require('./transdata/tdata');
 require('./crossorigin/cross');
+
 var websocket = require("./websocket/socket");
 
 var server = http.createServer(function(req , res){

@@ -1,6 +1,6 @@
 "use strict";
 
-var router = require('easy-router')();
+var router = require('easy-router');
 var querystring = require('querystring');
 
 router.setMap({

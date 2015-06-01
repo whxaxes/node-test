@@ -83,7 +83,7 @@ var sourceList = {
         colum:".main-content .post",
         handle:function($colum){
             return {
-                url:$colum.find(".post-title a").attr("href"),
+                url:this.url+$colum.find(".post-title a").attr("href"),
                 title:$colum.find(".post-title a").text(),
                 time:$colum.find(".post-date").attr("datetime")
             }
