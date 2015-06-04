@@ -7,7 +7,6 @@
 </head>
 <body>
 <script>
-
     getJSON({
         param1: 'data1',
         param2: 'data2',
@@ -20,7 +19,7 @@
         console.log(data);
     }
 
-//    使用jsonp跨域
+    //    使用jsonp跨域
     function getJSON(options) {
         var script = document.createElement('script');
         var src = "http://127.0.0.1:9030/cross/jsonp";
@@ -36,23 +35,23 @@
 
         script.src = src;
 
-        script.onload = function () {
+        script.onload = function() {
             document.body.removeChild(this);
         };
 
         document.body.appendChild(script);
     }
 
-//    使用Html5的Access-Control-Allow-Origin进行跨域
-    function ajax(data){
+    //    使用Html5的Access-Control-Allow-Origin进行跨域
+    function ajax(data) {
         var xhr = new XMLHttpRequest();
 
-        xhr.open('post' , 'http://127.0.0.1:9030/cross/origin');
+        xhr.open('post', 'http://127.0.0.1:9030/cross/origin');
 
-        xhr.setRequestHeader('Access-Control-Allow-Origin' , 'http://localhost:63342');
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
 
-        xhr.onreadystatechange = function(){
-            if(this.readyState == 4 && /^2|3\d{2}$/.test(this.status)){
+        xhr.onreadystatechange = function() {
+            if (this.readyState == 4 && /^2|3\d{2}$/.test(this.status)) {
                 console.log(xhr.responseText);
             }
         };
