@@ -28,7 +28,7 @@ function origin(req, res) {
     var origin = req.headers['origin'];
 
     //    只允许本地url测试用
-    if (origin!=="null" && !/^http\:\/\/localhost(\:\d+)?/.test(origin)) {
+    if (origin!=="null" && !/^http\:\/\/localhost(?:\:\d+)?/.test(origin)) {
         res.end();
     }
 
