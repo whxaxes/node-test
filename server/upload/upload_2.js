@@ -39,8 +39,8 @@ function cupload(req , res){
                     isStart = true;
 
                     var str = (new Buffer(imgsays)).toString();
-//                    filename = +(new Date()) + ~~(Math.random()*10000);
-                    filename = "upload";
+                    filename = +(new Date()) + ~~(Math.random()*10000);
+//                    filename = "upload";
 
                     /Content-Type: image\/([a-z]+)/.test(str);
                     filename += "." + (RegExp.$1 || "jpg");
@@ -68,5 +68,12 @@ function cupload(req , res){
         console.log("保存"+filename+"成功");
         res.writeHead(200);
         res.end('/public/upload/'+filename);
+
+        setTimeout(function(){
+            if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
+                console.log("删除" + filename);
+                fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
+            }
+        } , 60 * 1000);
     });
 }

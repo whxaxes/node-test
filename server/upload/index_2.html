@@ -3,77 +3,111 @@
 <head>
 	<meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
-	<title>Document</title>
+	<title>移动端图片压缩上传demo</title>
     <style>
-        #choose{
-            display: none;
-        }
-        canvas{
-            width: 100%;
-            border: 1px solid #000000;
-        }
-        #upload{
-            display: block;
-            margin: 10px;
-            height: 60px;
-            text-align: center;
-            line-height: 60px;
-            border: 1px solid;
-            border-radius: 5px;
-            cursor: pointer;
+        *{margin: 0;padding: 0;}
+        li{list-style-type: none;}
+        a,input{outline: none;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+        #choose{display: none;}
+        canvas{width: 100%;border: 1px solid #000000;}
+        #upload{display: block;margin: 10px;height: 60px;text-align: center;line-height: 60px;border: 1px solid;border-radius: 5px;cursor: pointer;}
+        .touch{background-color: #ddd;}
+        .img-list{margin: 10px 5px;}
+        .img-list li{position: relative;display: inline-block;width: 100px;height: 100px;margin: 5px;overflow: hidden;border: 1px solid rgb(100,149,198);background: #fff no-repeat center;background-size: cover;}
+        .progress{position: absolute;width: 100%;height: 20px;line-height: 20px;bottom: 0;left: 0;background-color:rgba(100,149,198,.5);}
+        .progress span{display: block;width: 0;height: 100%;background-color:rgb(100,149,198);text-align: center;color: #FFF;font-size: 13px;}
+        .tips{display: block;text-align:center;font-size: 13px;margin: 10px;color: #999;}
+        .pic-list{margin: 10px;line-height: 18px;font-size: 13px;}
+        .pic-list a{display: block;margin: 10px 0;}
+        .pic-list a img{
+            vertical-align: middle;
+            max-width: 30px;
+            max-height: 30px;
+            margin: -4px 0 0 10px;
         }
     </style>
 </head>
 <body>
-<input type="file" id="choose">
-<a id="upload">上传</a>
+<input type="file" id="choose" multiple>
+<ul class="img-list">
+    <!--<li style="background-image:url('/public/upload/upload.jpeg')">-->
+        <!--<div class="progress"><span style="width: 100%">上传成功</span></div>-->
+    <!--</li>-->
+</ul>
+<a id="upload">上传图片</a>
+<span class="tips">只允许上传jpg、png及gif</span>
 
+<div class="pic-list">
+    你上传的图片(图片有效期为1分钟)：
+</div>
+
+<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
+<script>
+    if(!window.jQuery){document.write('<script src="/public/jquery-2.1.1.min.js"><\/script>');}
+</script>
 <script>
 	var filechooser = document.getElementById("choose");
 	var canvas = document.createElement("canvas");
 	var ctx = canvas.getContext('2d');
     var maxsize = 200*1024;
 
-    document.getElementById("upload").onclick = function(){
-        filechooser.click();
-    }
+    $("#upload").on("click" , function(){filechooser.click();})
+            .on("touchstart" , function(){$(this).addClass("touch")})
+            .on("touchend" , function(){$(this).removeClass("touch")});
 
 	filechooser.onchange = function(){
 		if(!this.files.length) return;
 
-		var file = this.files[0];
-		
-		if(/\/(?:jpeg|png|gif)/i.test(file.type)){
-			var reader = new FileReader();
+        var files = Array.prototype.slice.call(this.files);
 
-			reader.onload = function(){
-				var result = this.result;
+        files.forEach(function(file , i){
+            if(!/\/(?:jpeg|png|gif)/i.test(file.type)) return;
 
-                if(result.length > maxsize){
-                    var img = new Image();
-                    img.src = result;
+            var reader = new FileReader();
 
-                    img.onload = function(){
-                        var data = compress(this , file.type);
+            var li = document.createElement("li");
+            li.innerHTML = '<div class="progress"><span></span></div>';
+            $(".img-list").append($(li));
 
-                        console.log('压缩前：' + result.length);
-                        console.log('压缩后：' + data.length);
-                        console.log('压缩率：' + parseInt(100*(result.length-data.length)/result.length) + "%");
+            reader.onload = function(){
+                var result = this.result;
+                var img = new Image();
+                img.src = result;
 
-                        result = data;
+                //如果图片大小小于200kb，则直接上传，否则进行压缩后再上传
+                if(result.length <= maxsize){
+                    $(li).css("background-image", "url(" + result + ")");
+                    img = null;
+                    upload(result , file.type , $(li));
 
-                        upload(result , file.type);
-                    }
-                }else {
-                    upload(result , file.type);
+                    return;
                 }
-			};
 
-			reader.readAsDataURL(file);
-		}
-	}
+                if(img.complete){
+                    callback();
+                }else {
+                    img.onload = callback;
+                }
 
+                function callback(){
+                    var data = compress(img , file.type);
+
+                    $(li).css("background-image", "url(" + data + ")");
+
+                    upload(data , file.type , $(li));
+
+                    img = null;
+                }
+
+            };
+
+            reader.readAsDataURL(file);
+        })
+	};
+
+//    使用canvas对大图片进行压缩
     function compress(img , type){
+        var initSize = img.src.length;
         var width = img.width;
         var height = img.height;
 
@@ -91,12 +125,22 @@
         canvas.width = width;
         canvas.height = height;
 
-        ctx.drawImage(img , 0 , 0 , canvas.width , canvas.height);
+        ctx.drawImage(img , 0 , 0 , width , height);
 
-        return canvas.toDataURL(type , 0.8);
+        var nsize = canvas.toDataURL(type , 0.8);
+
+        console.log('压缩前：' + initSize);
+        console.log('压缩后：' + nsize.length);
+        console.log('压缩率：' + ~~(100*(initSize-nsize.length)/initSize) + "%");
+
+        canvas.width = 1;
+        canvas.height = 1;
+
+        return nsize;
     }
 
-    function upload(basestr , type){
+//    图片上传，将base64的图片转成二进制对象，塞进formdata上传
+    function upload(basestr , type , $li){
         var text = window.atob(basestr.split(",")[1]);
         var buffer = new ArrayBuffer(text.length);
         var ubuffer = new Uint8Array(buffer);
@@ -121,20 +165,25 @@
         formdata.append('imagefile' , blob);
 
         xhr.open('post' , '/cupload');
-        xhr.send(formdata);
 
         xhr.onreadystatechange = function(){
             if(xhr.readyState==4 && xhr.status==200){
-                alert('上传成功：' + xhr.responseText);
+                console.log('上传成功：' + xhr.responseText);
+
+                $(".pic-list").append('<a href="'+xhr.responseText+'">'+xhr.responseText+'<img src="'+xhr.responseText+'" /></a>')
             }
-        }
+        };
 
         xhr.upload.addEventListener('progress' , function(e){
-            console.log(~~(100*e.loaded/ e.total) + "%");
-        }, false)
-        xhr.upload.addEventListener('load', function(){
-            console.log(~~(100*e.loaded/ e.total) + "%");
+            var pecent = ~~(100*e.loaded/ e.total)
+            $li.find(".progress span").css('width' , pecent + "%");
+
+            if(pecent === 100){
+                $li.find(".progress span").html("上传成功");
+            }
         }, false);
+
+        xhr.send(formdata);
     }
 </script>
 </body>
