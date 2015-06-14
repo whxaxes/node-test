@@ -13,4 +13,6 @@ nodejs test demos
 
 [图片上传预览及文件上传](https://github.com/whxaxes/node-test/tree/master/server/upload)：效果预览：[http://wanghx.cn:9030/uindex](http://wanghx.cn:9030/uindex)
 
+[移动端图片压缩上传](https://github.com/whxaxes/node-test/tree/master/server/upload/index_2.html)：效果预览：[http://wanghx.cn:9030/uindex_2](http://wanghx.cn:9030/uindex_2)
+
 [websocket实现，数据收发帧解析](https://github.com/whxaxes/node-test/tree/master/server/websocket)：效果预览：[http://wanghx.cn:9030/wsindex](http://wanghx.cn:9030/wsindex)
