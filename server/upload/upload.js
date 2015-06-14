@@ -8,6 +8,8 @@ var router = require("easy-router");
 
 var sessionMaps = {};
 
+require("./upload_2");
+
 router.setMap({
     "upl": "upload/upload.html",
     "uindex": page,
@@ -17,7 +19,6 @@ router.setMap({
 
 //获取上传进度信息
 function getProgress(req , res){
-    console.log(getSymbol(req))
     var sessionMap = sessionMaps[getSymbol(req)];
 
     res.end('{"now":"'+sessionMap.now+'" , "size":"'+sessionMap.size+'" , "speed":"'+sessionMap.speed+'"}');
@@ -69,7 +70,7 @@ function upload(req , res){
         isStart = false;
 
     var ws , filename , path;
-    var sessionMap = sessionMaps[getSymbol(req)];
+    var sessionMap = sessionMaps[getSymbol(req)] || {};
 
     try{
         fs.statSync(STATIC_PATH + '/upload')
@@ -119,7 +120,7 @@ function upload(req , res){
 
                     var str = (new Buffer(imgsays)).toString();
                     filename = str.match(/filename=".*"/g)[0].split('"')[1];
-                    path = STATIC_PATH + 'upload/'+filename;
+                    path = STATIC_PATH + 'upload/' + filename;
                     ws = fs.createWriteStream(path);
 
                 }else if(i==chunk.length-2){    //说明到了数据尾部的\r\n
@@ -154,3 +155,4 @@ function upload(req , res){
         sessionMap.now = 0;
     });
 }
+
