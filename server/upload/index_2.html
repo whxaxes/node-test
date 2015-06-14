@@ -41,10 +41,7 @@
     你上传的图片(图片有效期为1分钟)：
 </div>
 
-<script src="http://lib.sinaapp.com/js/jquery/1.9.1/jquery-1.9.1.min.js"></script>
-<script>
-    if(!window.jQuery){document.write('<script src="/public/jquery-2.1.1.min.js"><\/script>');}
-</script>
+<script src="/public/jquery-2.1.1.min.js"></script>
 <script>
 	var filechooser = document.getElementById("choose");
 	var canvas = document.createElement("canvas");
@@ -59,6 +56,11 @@
 		if(!this.files.length) return;
 
         var files = Array.prototype.slice.call(this.files);
+
+        if(files.length > 9){
+            alert("最多同时只可上传9张图片");
+            return;
+        }
 
         files.forEach(function(file , i){
             if(!/\/(?:jpeg|png|gif)/i.test(file.type)) return;
@@ -144,6 +146,7 @@
         var text = window.atob(basestr.split(",")[1]);
         var buffer = new ArrayBuffer(text.length);
         var ubuffer = new Uint8Array(buffer);
+        var pecent = 0 , loop = null;
 
         for(var i=0;i<text.length;i++){
             ubuffer[i] = text.charCodeAt(i);
@@ -170,18 +173,40 @@
             if(xhr.readyState==4 && xhr.status==200){
                 console.log('上传成功：' + xhr.responseText);
 
+                clearInterval(loop);
+
+                //当收到该消息时上传完毕
+                $li.find(".progress span").animate({'width' : "100%"} , pecent<95?200:0 , function(){
+                    $(this).html("上传成功");
+                });
+
                 $(".pic-list").append('<a href="'+xhr.responseText+'">'+xhr.responseText+'<img src="'+xhr.responseText+'" /></a>')
             }
         };
 
+        //数据发送进度，前50%展示该进度
         xhr.upload.addEventListener('progress' , function(e){
-            var pecent = ~~(100*e.loaded/ e.total)
+            if(loop) return;
+
+            pecent = ~~(100*e.loaded/ e.total) / 2;
             $li.find(".progress span").css('width' , pecent + "%");
 
-            if(pecent === 100){
-                $li.find(".progress span").html("上传成功");
+            if(pecent == 50){
+                mockProgress();
             }
         }, false);
+
+        //数据后50%用模拟进度
+        function mockProgress(){
+            if(loop) return;
+
+            loop = setInterval(function(){
+                pecent++;
+                $li.find(".progress span").css('width' , pecent + "%");
+
+                if(pecent == 99){clearInterval(loop);}
+            } , 100)
+        }
 
         xhr.send(formdata);
     }

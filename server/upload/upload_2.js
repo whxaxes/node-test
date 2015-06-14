@@ -69,6 +69,7 @@ function cupload(req , res){
         res.writeHead(200);
         res.end('/public/upload/'+filename);
 
+//      每张图片给予一分钟保存时间
         setTimeout(function(){
             if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
                 console.log("删除" + filename);

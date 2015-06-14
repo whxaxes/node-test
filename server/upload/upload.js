@@ -145,9 +145,19 @@ function upload(req , res){
         res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8'});
         res.end('<div id="path">/public/upload/'+filename+'</div>');
 
+//        防止他人上传大量图片，每次上传一次图片将此前上传的删除
         if(fs.existsSync(sessionMap.file)){
+            console.log("删除" + sessionMap.file);
             fs.unlinkSync(sessionMap.file)
         }
+
+//        同时设个定时器，所有图片一分钟后如果还存在则删除
+        setTimeout(function(){
+            if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
+                console.log("删除" + filename);
+                fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
+            }
+        } , 60 * 1000);
 
         sessionMap.file = STATIC_PATH + 'upload/'+filename;
         sessionMap.speed = 0;
