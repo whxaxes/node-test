@@ -19,7 +19,7 @@ router.setMap({
 
 //获取上传进度信息
 function getProgress(req , res){
-    var sessionMap = sessionMaps[getSymbol(req)];
+    var sessionMap = sessionMaps[getSymbol(req)] || {};
 
     res.end('{"now":"'+sessionMap.now+'" , "size":"'+sessionMap.size+'" , "speed":"'+sessionMap.speed+'"}');
 }
