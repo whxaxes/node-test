@@ -117,28 +117,51 @@
             width /= 3;
             height /= 3;
         }
+//        width /= 1.8;
+//        height /= 1.8;
 
+//        alert(width * height)
         if(width*height > 2000000){
             var bs = ~~((width*height/2000000) + 1);
             width /= bs;
             height /= bs;
         }
 
+
         canvas.width = width;
         canvas.height = height;
 
-        ctx.drawImage(img , 0 , 0 , width , height);
+//        if(width*height > 2000000){
+//            var fenshu = ~~((width*height/2000000) + 1);
+//            var nw = width/Math.sqrt(fenshu);
+//            var nh = height/Math.sqrt(fenshu);
+//            var tCanvas = document.createElement("canvas");
+//            var tctx = tCanvas.getContext("2d");
+//
+//            tCanvas.width = nw;
+//            tCanvas.height = nh;
+//
+//            for(var i=0;i<fenshu;i++){
+//                for(var j=0;j<fenshu;j++){
+//                    tctx.drawImage(img , i*nw , j*nh , nw , nh , 0 , 0 , nw , nh);
+//
+//                    ctx.drawImage(tCanvas , i*nw , j*nh , nw , nh);
+//                }
+//            }
+//        }else {
+            ctx.drawImage(img , 0 , 0 , width , height);
+//        }
 
-        var nsize = canvas.toDataURL(type , 0.8);
+        var ndata = canvas.toDataURL(type , 0.8);
 
         console.log('压缩前：' + initSize);
-        console.log('压缩后：' + nsize.length);
-        console.log('压缩率：' + ~~(100*(initSize-nsize.length)/initSize) + "%");
+        console.log('压缩后：' + ndata.length);
+        console.log('压缩率：' + ~~(100*(initSize-ndata.length)/initSize) + "%");
 
         canvas.width = 1;
         canvas.height = 1;
 
-        return nsize;
+        return ndata;
     }
 
 //    图片上传，将base64的图片转成二进制对象，塞进formdata上传
