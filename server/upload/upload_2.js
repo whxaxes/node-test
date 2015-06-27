@@ -42,8 +42,9 @@ function cupload(req , res){
                     filename = +(new Date()) + ~~(Math.random()*10000);
 //                    filename = "upload";
 
-                    /Content-Type: image\/([a-z]+)/.test(str);
-                    filename += "." + (RegExp.$1 || "jpg");
+                    var suffix = /Content-Type: image\/([a-z]+)/.test(str)?RegExp.$1:"jpg";
+                    suffix = (suffix === "jpeg") ? "jpg" : suffix;
+                    filename += "." + suffix;
 
                     path = STATIC_PATH + 'upload/' + filename;
                     ws = fs.createWriteStream(path);
