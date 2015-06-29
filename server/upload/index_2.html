@@ -55,7 +55,7 @@
     var tCanvas = document.createElement("canvas");
     var tctx = tCanvas.getContext("2d");
 
-    var maxsize = 200 * 1024;
+    var maxsize = 100 * 1024;
 
     $("#upload").on("click", function () {
         filechooser.click();
@@ -94,7 +94,7 @@
                 var img = new Image();
                 img.src = result;
 
-                //如果图片大小小于200kb，则直接上传
+                //如果图片大小小于100kb，则直接上传
                 if (result.length <= maxsize) {
                     $(li).css("background-image", "url(" + result + ")");
                     img = null;
