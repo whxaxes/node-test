@@ -13,9 +13,10 @@
         #upload{display: block;margin: 10px;height: 60px;text-align: center;line-height: 60px;border: 1px solid;border-radius: 5px;cursor: pointer;}
         .touch{background-color: #ddd;}
         .img-list{margin: 10px 5px;}
-        .img-list li{position: relative;display: inline-block;width: 100px;height: 100px;margin: 5px;overflow: hidden;border: 1px solid rgb(100,149,198);background: #fff no-repeat center;background-size: cover;}
+        .img-list li{position: relative;display: inline-block;width: 100px;height: 100px;margin: 5px 5px 20px 5px;border: 1px solid rgb(100,149,198);background: #fff no-repeat center;background-size: cover;}
         .progress{position: absolute;width: 100%;height: 20px;line-height: 20px;bottom: 0;left: 0;background-color:rgba(100,149,198,.5);}
         .progress span{display: block;width: 0;height: 100%;background-color:rgb(100,149,198);text-align: center;color: #FFF;font-size: 13px;}
+        .size{position: absolute;width: 100%;height: 15px;line-height: 15px;bottom: -18px;text-align: center;font-size: 13px;color: #666;}
         .tips{display: block;text-align:center;font-size: 13px;margin: 10px;color: #999;}
         .pic-list{margin: 10px;line-height: 18px;font-size: 13px;}
         .pic-list a{display: block;margin: 10px 0;}
@@ -32,6 +33,7 @@
 <ul class="img-list">
     <!--<li style="background-image:url('/public/upload/upload.jpeg')">-->
         <!--<div class="progress"><span style="width: 100%">上传成功</span></div>-->
+        <!--<div class="size">100KB</div>-->
     <!--</li>-->
 </ul>
 <a id="upload">上传图片</a>
@@ -81,7 +83,10 @@
             var reader = new FileReader();
 
             var li = document.createElement("li");
-            li.innerHTML = '<div class="progress"><span></span></div>';
+
+//          获取图片大小
+            var size = file.size/1024 > 1024 ? (~~(10*file.size/1024/1024))/10 + "MB" :  ~~(file.size/1024) + "KB";
+            li.innerHTML = '<div class="progress"><span></span></div><div class="size">'+size+'</div>';
             $(".img-list").append($(li));
 
             reader.onload = function () {
@@ -209,7 +214,8 @@
 
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
-                console.log('上传成功：' + xhr.responseText);
+                var jsonData = JSON.parse(xhr.responseText);
+                console.log('上传成功：' + jsonData.path);
 
                 clearInterval(loop);
 
@@ -218,7 +224,7 @@
                     $(this).html("上传成功");
                 });
 
-                $(".pic-list").append('<a href="' + xhr.responseText + '">' + xhr.responseText + '<img src="' + xhr.responseText + '" /></a>')
+                $(".pic-list").append('<a href="' + jsonData.path + '">' +jsonData.path + '（' + jsonData.size+'）<img src="' + jsonData.path + '" /></a>');
             }
         };
 

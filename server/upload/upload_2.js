@@ -14,6 +14,8 @@ function cupload(req , res){
         num = 0,
         isStart = false;
 
+    var size = 0;
+
     var ws ,
         filename ,
         path;
@@ -28,6 +30,8 @@ function cupload(req , res){
         var start = 0;
         var end = chunk.length;
         var rems = [];
+
+        size += chunk.length;
 
         for(var i=0;i<chunk.length;i++){
             if(chunk[i]==13 && chunk[i+1]==10){
@@ -65,17 +69,22 @@ function cupload(req , res){
     });
 
     req.on("end",function(){
-        ws.end();
-        console.log("保存"+filename+"成功");
-        res.writeHead(200);
-        res.end('/public/upload/'+filename);
+        if(ws){
+            ws.end();
+            console.log("保存"+filename+"成功");
+            res.writeHead(200);
+            res.end('{"path":"/public/upload/' + filename + '","size":"' + ~~(size / 1024) + 'KB"}');
 
 //      每张图片给予一分钟保存时间
-        setTimeout(function(){
-            if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
-                console.log("删除" + filename);
-                fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
-            }
-        } , 60 * 1000);
+            setTimeout(function(){
+                if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
+                    console.log("删除" + filename);
+                    fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
+                }
+            } , 60 * 1000);
+        }else {
+            res.writeHead(404);
+            res.end("");
+        }
     });
 }
