@@ -1,3 +1,6 @@
+/*
+*PC端文件上传功能
+ */
 "use strict";
 
 var http = require('http');

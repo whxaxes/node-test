@@ -1,8 +1,13 @@
-//测试图片压缩上传功能
+/*
+*移动端图片压缩上传功能后台
+ */
 "use strict";
 
 var fs = require('fs');
 var router = require("easy-router");
+var FormParser = require("./formParser");
+
+var fileSaveDir = STATIC_PATH + 'upload';
 
 router.setMap({
     "uindex_2" : "upload/index_2.html",
@@ -10,81 +15,41 @@ router.setMap({
 });
 
 function cupload(req , res){
-    var imgsays = [],
-        num = 0,
-        isStart = false;
+    if(!fs.existsSync(fileSaveDir)){fs.mkdirSync(fileSaveDir)}
 
-    var size = 0;
+    var formparser = new FormParser(fileSaveDir);
 
-    var ws ,
-        filename ,
-        path;
-
-    try{
-        fs.statSync(STATIC_PATH + '/upload')
-    }catch(e){
-        fs.mkdirSync(STATIC_PATH + '/upload')
-    }
-
+    req.encoding = "utf-8";
     req.on('data' , function(chunk){
-        var start = 0;
-        var end = chunk.length;
-        var rems = [];
-
-        size += chunk.length;
-
-        for(var i=0;i<chunk.length;i++){
-            if(chunk[i]==13 && chunk[i+1]==10){
-                num++;
-                rems.push(i);
-
-                if(num==4){
-                    start = i+2;
-                    isStart = true;
-
-                    var str = (new Buffer(imgsays)).toString();
-                    filename = +(new Date()) + ~~(Math.random()*10000);
-//                    filename = "upload";
-
-                    var suffix = /Content-Type: image\/([a-z]+)/.test(str)?RegExp.$1:"jpg";
-                    suffix = (suffix === "jpeg") ? "jpg" : suffix;
-                    filename += "." + suffix;
-
-                    path = STATIC_PATH + 'upload/' + filename;
-                    ws = fs.createWriteStream(path);
-                }else if(i==chunk.length-2){    //说明到了数据尾部的\r\n
-                    end = rems[rems.length-2];
-                    break;
-                }
-            }
-
-            if(num<4){
-                imgsays.push(chunk[i])
-            }
-        }
-
-        if(isStart){
-            ws.write(chunk.slice(start , end));
-        }
+        formparser.push(chunk);
     });
 
     req.on("end",function(){
-        if(ws){
-            ws.end();
-            console.log("保存"+filename+"成功");
-            res.writeHead(200);
-            res.end('{"path":"/public/upload/' + filename + '","size":"' + ~~(size / 1024) + 'KB"}');
+        var data = [];
+        formparser.formDataArray.forEach(function(fdata){
+            switch (fdata.type){
+                case "image":
+                    data.push({
+                        type : fdata.type,
+                        path : '/public/upload/'+fdata.filename,
+                        size : fdata.size/1024 > 1024 ? (~~(10*fdata.size/1024/1024))/10 + "MB" :  ~~(fdata.size/1024) + "KB"
+                    });
 
-//      每张图片给予一分钟保存时间
-            setTimeout(function(){
-                if(fs.existsSync(STATIC_PATH + 'upload/' + filename)){
-                    console.log("删除" + filename);
-                    fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
-                }
-            } , 60 * 1000);
-        }else {
-            res.writeHead(404);
-            res.end("");
-        }
+//                  每张图片给予一分钟保存时间
+                    setTimeout(function(){
+                        if(!fs.existsSync(fdata.path)) return;
+
+                        console.log("\x1B[33m删除文件" + fdata.filename + "\x1B[0m");
+                        fs.unlinkSync(fdata.path);
+                    } , 60 * 1000);
+
+                    break;
+                default :break;
+            }
+        });
+        formparser.clear();
+
+        res.writeHead(200);
+        res.end(JSON.stringify(data));
     });
 }

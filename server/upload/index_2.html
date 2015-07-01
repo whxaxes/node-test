@@ -187,27 +187,19 @@
     //    图片上传，将base64的图片转成二进制对象，塞进formdata上传
     function upload(basestr, type, $li) {
         var text = window.atob(basestr.split(",")[1]);
-        var buffer = new ArrayBuffer(text.length);
-        var ubuffer = new Uint8Array(buffer);
+        var buffer = new Uint8Array(text.length);
         var pecent = 0 , loop = null;
 
         for (var i = 0; i < text.length; i++) {
-            ubuffer[i] = text.charCodeAt(i);
+            buffer[i] = text.charCodeAt(i);
         }
 
-        var Builder = window.WebKitBlobBuilder || window.MozBlobBuilder;
-        var blob;
-
-        if (Builder) {
-            var builder = new Builder();
-            builder.append(buffer);
-            blob = builder.getBlob(type);
-        } else {
-            blob = new window.Blob([buffer], {type: type});
-        }
+        var blob = new Blob([buffer], {type: type});
 
         var xhr = new XMLHttpRequest();
+
         var formdata = new FormData();
+
         formdata.append('imagefile', blob);
 
         xhr.open('post', '/cupload');
@@ -215,7 +207,7 @@
         xhr.onreadystatechange = function () {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 var jsonData = JSON.parse(xhr.responseText);
-                console.log('上传成功：' + jsonData.path);
+                console.log('上传成功：' + jsonData[0].path);
 
                 clearInterval(loop);
 
@@ -224,7 +216,7 @@
                     $(this).html("上传成功");
                 });
 
-                $(".pic-list").append('<a href="' + jsonData.path + '">' +jsonData.path + '（' + jsonData.size+'）<img src="' + jsonData.path + '" /></a>');
+                $(".pic-list").append('<a href="' + jsonData[0].path + '">' +jsonData[0].path + '（' + jsonData[0].size+'）<img src="' + jsonData[0].path + '" /></a>');
             }
         };
 
