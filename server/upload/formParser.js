@@ -3,7 +3,9 @@
  */
 
 var fs = require('fs');
-var mimes = ".jpg,image/jpeg,.gif,image/gif.png,image/png".split(",");
+var path = require('path');
+var mimes = "image/jpeg,image/gif,image/png".split(",");
+var exts = ".jpg,.gif,.png".split(",");
 
 function FormParser(fileSaveDir) {
     this.recordLine = [];
@@ -49,7 +51,7 @@ fp.push = function (chunk) {
                         fdata.ws.end();
                         console.log("保存文件：" + fdata.path);
                     } else {
-                        fdata.value = Buffer.concat(fdata.chunks, fdata.size).toString();
+                        fdata.value = Buffer.concat(fdata.chunks||[], fdata.size).toString();
                         console.log("接收文本内容：" + fdata.name + "=" + fdata.value);
                     }
                 }
@@ -73,10 +75,10 @@ fp.push = function (chunk) {
                 start = i + 2;
                 fdata.size = 0;
                 //当ContentType为匹配mime里的类型时才创建文件流
-                if (contentType && (suffixIndex=mimes.indexOf(contentType))>=0) {
+                if (contentType && (suffixIndex = mimes.indexOf(contentType)) >= 0) {
                     fdata.type = mimes[suffixIndex].split("/")[0];
-                    fdata.filename = +(new Date()) + ~~(Math.random() * 10000) + mimes[suffixIndex-1];
-                    fdata.path = this.fileSaveDir + "/" + fdata.filename;
+                    fdata.filename = +(new Date()) + ~~(Math.random() * 10000) + exts[suffixIndex];
+                    fdata.path = path.join(this.fileSaveDir , fdata.filename);
                     fdata.ws = fs.createWriteStream(fdata.path);
                 } else if(!contentType){
                     fdata.type = "text";

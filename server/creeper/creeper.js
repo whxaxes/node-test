@@ -56,7 +56,7 @@ var creeper = function(req , res){
     res.writeHead(200 , {'content-type':'text/html;charset=utf-8'});
     res.write(ejs.render(header , {keys : source.keys}));
 
-    console.log("采集数据...");
+    //console.log("采集数据...");
 
     var count = 0;
     source.forEach(function(index , id){
@@ -68,9 +68,9 @@ var creeper = function(req , res){
             count++;
 
             if(msg == "error"){
-                console.log(">【"+id+ "】fail× ："+result.message);
+                //console.log(">【"+id+ "】fail× ："+result.message);
             }else {
-                console.log(">【"+id+ "】get√");
+                //console.log(">【"+id+ "】get√");
 
                 var $ = cheerio.load(result);
                 var $colum = $(nowSource.colum);
@@ -95,7 +95,7 @@ var creeper = function(req , res){
             }
 
             if(count == source.length){
-                console.log("数据采集完成..");
+                //console.log("数据采集完成..");
                 res.end(foot);
             }
         });

@@ -60,12 +60,12 @@
     $("#upload").on("click", function () {
         filechooser.click();
     })
-            .on("touchstart", function () {
-                $(this).addClass("touch")
-            })
-            .on("touchend", function () {
-                $(this).removeClass("touch")
-            });
+    .on("touchstart", function () {
+        $(this).addClass("touch")
+    })
+    .on("touchend", function () {
+        $(this).removeClass("touch")
+    });
 
     filechooser.onchange = function () {
         if (!this.files.length) return;
@@ -94,10 +94,12 @@
                 var img = new Image();
                 img.src = result;
 
+                $(li).css("background-image", "url(" + result + ")");
+
                 //如果图片大小小于100kb，则直接上传
                 if (result.length <= maxsize) {
-                    $(li).css("background-image", "url(" + result + ")");
                     img = null;
+
                     upload(result, file.type, $(li));
 
                     return;
@@ -112,8 +114,6 @@
 
                 function callback() {
                     var data = compress(img);
-
-                    $(li).css("background-image", "url(" + data + ")");
 
                     upload(data, file.type, $(li));
 
