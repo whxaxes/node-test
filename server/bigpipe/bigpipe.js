@@ -3,7 +3,9 @@ var router = require('easy-router');
 
 router.setMap("bigpipe" , function(req , res){
     //bigpipe测试
-    res.writeHead(200 , {'Content-Type': 'text/html;charset=utf-8'});
+    res.writeHead(200 , {
+        'Content-Type': 'text/html;charset=utf-8'
+    });
 
     var html = fs.readFileSync(__dirname + "/head.html").toString();
 

@@ -22,6 +22,7 @@ router.setMap("pjax/*.html" , function(req , res , pathname){
         text = $(".contents").html();
     }
 
+    res.writeHead(200, {"Content-Type": "text/html;charset=utf-8"});
     res.write(text);
     res.end();
 });
