@@ -28,7 +28,7 @@ var websocket = require("./websocket/socket");
 
 var server = http.createServer(function (req, res) {
     router.route(req, res);
-}).listen(9030, "127.0.0.1");
+}).listen(9030);
 
 websocket.update(server, function (ws) {
     ws.on('close', function (reason) {
