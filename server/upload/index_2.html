@@ -194,7 +194,7 @@
             buffer[i] = text.charCodeAt(i);
         }
 
-        var blob = new Blob([buffer], {type: type});
+        var blob = getBlob(buffer, type);
 
         var xhr = new XMLHttpRequest();
 
@@ -247,6 +247,18 @@
         }
 
         xhr.send(formdata);
+    }
+
+    // 获取blob对象的兼容性写法
+    function getBlob(buffer, format){
+        var Builder = window.WebKitBlobBuilder || window.MozBlobBuilder;
+        if(Builder){
+            var builder = new Builder;
+            builder.append(buffer);
+            return builder.getBlob(format);
+        } else {
+            return new window.Blob([ buffer ], {type: format});
+        }
     }
 </script>
 </body>

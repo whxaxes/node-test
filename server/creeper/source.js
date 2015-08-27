@@ -1,9 +1,5 @@
 "use strict";
 
-String.prototype.trim = function(){
-    return this.replace(/(^(\s+))|((\s+)$)/g, '');
-};
-
 var TIME_REG_1 = /\d{4}[^x00-xff]\d{1,2}[^x00-xff]\d{1,2}[^x00-xff]/;    //匹配XXXX年XX月XX日
 var TIME_REG_2 = /\d{4}-\d{1,2}-\d{1,2}/;        //匹配XXXX-XX-XX
 var TIME_REG_3 = /\d{4}\/\d{2}\/\d{2}/;        //匹配XXXX/XX/XX
