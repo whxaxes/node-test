@@ -5,7 +5,7 @@ var EventEmitter = require("events").EventEmitter;
 var router = require("easy-router");
 var webSocketCollector = [];
 
-router.setMap("wsindex" , "websocket/client.html");
+router.setMap("wsindex", "websocket/client.html");
 
 function WebSocket(socket) {
     this.state = "OPEN";
@@ -20,28 +20,28 @@ function WebSocket(socket) {
 
 util.inherits(WebSocket, EventEmitter);
 
-WebSocket.prototype.bind = function () {
+WebSocket.prototype.bind = function() {
     var that = this;
-    this.socket.on('data', function (data) {
+    this.socket.on('data', function(data) {
         that.dataHandle(data);
     });
 
-    this.socket.on('close', function (e) {
+    this.socket.on('close', function(e) {
         that.close(e);
     });
 
-    this.socket.on('error', function (e) {
+    this.socket.on('error', function(e) {
         that.close(e);
     });
 };
 
 //获取数据信息
-WebSocket.prototype.handleDataStat = function (data) {
+WebSocket.prototype.handleDataStat = function(data) {
     if (!this.stat) {
-        var dataIndex = 2;  //数据索引，因为第一个字节和第二个字节肯定不为数据，所以初始值为2
-        var secondByte = data[1];       //代表masked位和可能是payloadLength位的第二个字节
+        var dataIndex = 2; //数据索引，因为第一个字节和第二个字节肯定不为数据，所以初始值为2
+        var secondByte = data[1]; //代表masked位和可能是payloadLength位的第二个字节
         var hasMask = secondByte >= 128; //如果大于或等于128，说明masked位为1
-        secondByte -= hasMask ? 128 : 0;    //如果有掩码，需要将掩码那一位去掉
+        secondByte -= hasMask ? 128 : 0; //如果有掩码，需要将掩码那一位去掉
 
         var dataLength, maskedData;
 
@@ -72,7 +72,7 @@ WebSocket.prototype.handleDataStat = function (data) {
                 totalLength: dataLength,
                 length: dataLength,
                 maskedData: maskedData,
-                opcode: parseInt(data[0].toString(16).split("")[1] , 16)   //获取第一个字节的opcode位
+                opcode: parseInt(data[0].toString(16).split("")[1], 16) //获取第一个字节的opcode位
             };
         }
     } else {
@@ -81,7 +81,7 @@ WebSocket.prototype.handleDataStat = function (data) {
 };
 
 //解析数据
-WebSocket.prototype.dataHandle = function (data) {
+WebSocket.prototype.dataHandle = function(data) {
     this.handleDataStat(data);
     var stat;
 
@@ -96,7 +96,7 @@ WebSocket.prototype.dataHandle = function (data) {
 
     var result;
     if (stat.maskedData) {
-        result = new Buffer(data.length-stat.index);
+        result = new Buffer(data.length - stat.index);
         for (var i = stat.index, j = 0; i < data.length; i++, j++) {
             //对每个字节进行异或运算，masked是4个字节，所以%4，借此循环
             result[j] = data[i] ^ stat.maskedData[j % 4];
@@ -123,28 +123,28 @@ WebSocket.prototype.dataHandle = function (data) {
     }
 };
 
-WebSocket.prototype.reset = function () {
+WebSocket.prototype.reset = function() {
     this.stat = null;
     this.datas.length = 0;
 };
 
-WebSocket.prototype.close = function (reason) {
+WebSocket.prototype.close = function(reason) {
     this.emit('close', reason);
     this.state = "CLOSE";
     this.socket.destroy();
     var index = webSocketCollector.indexOf(this);
 
-    if(index>=0){
+    if (index >= 0) {
         webSocketCollector.splice(index, 1);
 
-        brocast("man:"+webSocketCollector.length);
+        brocast("man:" + webSocketCollector.length);
     }
 };
 
 //每隔10秒进行一次心跳检测，若连续发出三次心跳却没收到响应则关闭socket
-WebSocket.prototype.checkHeartBeat = function () {
+WebSocket.prototype.checkHeartBeat = function() {
     var that = this;
-    setTimeout(function () {
+    setTimeout(function() {
         if (that.state !== "OPEN") return;
 
         if (that.pingTimes >= 3) {
@@ -159,52 +159,53 @@ WebSocket.prototype.checkHeartBeat = function () {
         that.checkHeartBeat();
     }, 10000);
 };
-WebSocket.prototype.sendPing = function () {
+WebSocket.prototype.sendPing = function() {
     this.socket.write(new Buffer(['0x89', '0x0']))
 };
-WebSocket.prototype.sendPong = function () {
+WebSocket.prototype.sendPong = function() {
     this.socket.write(new Buffer(['0x8A', '0x0']))
 };
 
 //数据发送
-WebSocket.prototype.send = function (message) {
-    if(this.state !== "OPEN" && this.socket.writable) return;
+WebSocket.prototype.send = function(message) {
+    if (this.state !== "OPEN" && this.socket.writable) return;
 
     message = String(message);
     var length = Buffer.byteLength(message);
 
-//  数据的起始位置，如果数据长度16位也无法描述，则用64位，即8字节，如果16位能描述则用2字节，否则用第二个字节描述
+    //数据的起始位置，如果数据长度16位也无法描述，则用64位，即8字节，如果16位能描述则用2字节，否则用第二个字节描述
     var index = 2 + (length > 65535 ? 8 : (length > 125 ? 2 : 0));
 
-//  定义buffer，长度为描述字节长度 + message长度
+    //定义buffer，长度为描述字节长度 + message长度
     var buffer = new Buffer(index + length);
 
-//  第一个字节，fin位为1，opcode为1
+    //第一个字节，fin位为1，opcode为1
     buffer[0] = 129;
 
-//    因为是由服务端发至客户端，所以无需masked掩码
+    //因为是由服务端发至客户端，所以无需masked掩码
     if (length > 65535) {
         buffer[1] = 127;
 
-//      长度超过65535的则由8个字节表示，因为4个字节能表达的长度为4294967295，已经完全够用，因此直接将前面4个字节置0
+        //长度超过65535的则由8个字节表示，因为4个字节能表达的长度为4294967295，已经完全够用，因此直接将前面4个字节置0
         buffer.writeUInt32BE(0, 2);
         buffer.writeUInt32BE(length, 6);
     } else if (length > 125) {
         buffer[1] = 126;
 
-//      长度超过125的话就由2个字节表示
+        //长度超过125的话就由2个字节表示
         buffer.writeUInt16BE(length, 2);
     } else {
         buffer[1] = length;
     }
 
-//    写入正文
+    //写入正文
     buffer.write(message, index);
+    
     this.socket.write(buffer);
 };
 
-function brocast(msg){
-    webSocketCollector.forEach(function (ws) {
+function brocast(msg) {
+    webSocketCollector.forEach(function(ws) {
         if (ws && ws.state == "OPEN") {
             ws.send(msg);
         }
@@ -212,16 +213,16 @@ function brocast(msg){
 }
 
 module.exports = {
-    getList: function () {
+    getList: function() {
         return webSocketCollector.slice(0);
     },
 
-    brocast: function (msg) {
+    brocast: function(msg) {
         brocast(msg)
     },
 
-    update: function (server, callback) {
-        server.on('upgrade', function (req, socket, upgradeHead) {
+    upgrad: function(server, callback) {
+        server.on('upgrade', function(req, socket, upgradeHead) {
             var key = req.headers['sec-websocket-key'];
             key = crypto.createHash("sha1").update(key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").digest("base64");
             var headers = [
@@ -236,7 +237,7 @@ module.exports = {
             var ws = new WebSocket(socket);
             webSocketCollector.push(ws);
 
-            brocast("man:"+webSocketCollector.length);
+            brocast("man:" + webSocketCollector.length);
             callback(ws);
         });
     }
