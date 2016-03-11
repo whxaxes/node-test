@@ -5,7 +5,9 @@
 
 var fs = require('fs');
 var router = require("easy-router");
-var FormParser = require("./formParser");
+//var FormParser = require("./formParser");
+var formidable = require('formidable');
+var path = require('path');
 
 var fileSaveDir = STATIC_PATH + 'upload';
 
@@ -19,40 +21,38 @@ function cupload(req, res) {
     fs.mkdirSync(fileSaveDir)
   }
 
-  var formparser = new FormParser(fileSaveDir);
+  var form = new formidable.IncomingForm();
+  var responseData = [];
+  form.uploadDir = fileSaveDir;
+  form.type = true;
+  form.keepExtensions = true;
 
-  req.encoding = "utf-8";
-  req.on('data', function(chunk) {
-    formparser.push(chunk);
-  });
+  form.parse(req, function(err, fields, files){
+    if(!err) {
+      Object.keys(files).forEach(function(key){
+        var file = files[key];
+        var filename = path.basename(file.path);
 
-  req.on("end", function() {
-    var data = [];
-    formparser.formDataArray.forEach(function(fdata) {
-      switch (fdata.type) {
-        case "image":
-          data.push({
-            type: fdata.type,
-            path: '/public/upload/' + fdata.filename,
-            size: fdata.size / 1024 > 1024 ? (~~(10 * fdata.size / 1024 / 1024)) / 10 + "MB" : ~~(fdata.size / 1024) + "KB"
-          });
+        //每张图片给予一分钟保存时间
+        setTimeout(function() {
+          if (!fs.existsSync(file.path)) return;
 
-//        每张图片给予一分钟保存时间
-          setTimeout(function() {
-            if (!fs.existsSync(fdata.path)) return;
+          console.log("\x1B[33m删除文件" + filename + "\x1B[0m");
+          fs.unlinkSync(file.path);
+        }, 60 * 1000);
 
-            console.log("\x1B[33m删除文件" + fdata.filename + "\x1B[0m");
-            fs.unlinkSync(fdata.path);
-          }, 60 * 1000);
-
-          break;
-        default :
-          break;
-      }
-    });
-    formparser.clear();
+        // 塞入响应数据中
+        responseData.push({
+          type: file.type,
+          path: '/public/upload/' + filename,
+          size: file.size / 1024 > 1024 ? (~~(10 * file.size / 1024 / 1024)) / 10 + "MB" : ~~(file.size / 1024) + "KB"
+        });
+      });
+    } else {
+      console.warn(err);
+    }
 
     res.writeHead(200);
-    res.end(JSON.stringify(data));
+    res.end(JSON.stringify(responseData));
   });
 }

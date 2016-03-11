@@ -5,128 +5,29 @@
   <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport">
   <title>移动端图片压缩上传demo</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-    }
-
-    li {
-      list-style-type: none;
-    }
-
-    a, input {
-      outline: none;
-      -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-    }
-
-    #choose {
-      display: none;
-    }
-
-    canvas {
-      width: 100%;
-      border: 1px solid #000000;
-    }
-
-    #upload {
-      display: block;
-      margin: 10px;
-      height: 60px;
-      text-align: center;
-      line-height: 60px;
-      border: 1px solid;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-
-    .touch {
-      background-color: #ddd;
-    }
-
-    .img-list {
-      margin: 10px 5px;
-    }
-
-    .img-list li {
-      position: relative;
-      display: inline-block;
-      width: 100px;
-      height: 100px;
-      margin: 5px 5px 20px 5px;
-      border: 1px solid rgb(100, 149, 198);
-      background: #fff no-repeat center;
-      background-size: cover;
-    }
-
-    .progress {
-      position: absolute;
-      width: 100%;
-      height: 20px;
-      line-height: 20px;
-      bottom: 0;
-      left: 0;
-      background-color: rgba(100, 149, 198, .5);
-    }
-
-    .progress span {
-      display: block;
-      width: 0;
-      height: 100%;
-      background-color: rgb(100, 149, 198);
-      text-align: center;
-      color: #FFF;
-      font-size: 13px;
-    }
-
-    .size {
-      position: absolute;
-      width: 100%;
-      height: 15px;
-      line-height: 15px;
-      bottom: -18px;
-      text-align: center;
-      font-size: 13px;
-      color: #666;
-    }
-
-    .tips {
-      display: block;
-      text-align: center;
-      font-size: 13px;
-      margin: 10px;
-      color: #999;
-    }
-
-    .pic-list {
-      margin: 10px;
-      line-height: 18px;
-      font-size: 13px;
-    }
-
-    .pic-list a {
-      display: block;
-      margin: 10px 0;
-    }
-
-    .pic-list a img {
-      vertical-align: middle;
-      max-width: 30px;
-      max-height: 30px;
-      margin: -4px 0 0 10px;
-    }
+    *{margin: 0;padding: 0;}
+    li{list-style-type: none;}
+    a,input{outline: none;-webkit-tap-highlight-color:rgba(0,0,0,0);}
+    #choose{display: none;}
+    canvas{width: 100%;border: 1px solid #000000;}
+    #upload{display: block;margin: 10px;height: 60px;text-align: center;line-height: 60px;border: 1px solid;border-radius: 5px;cursor: pointer;}
+    .touch{background-color: #ddd;}
+    .img-list{margin: 10px 5px;}
+    .img-list li{position: relative;display: inline-block;width: 100px;height: 100px;margin: 5px 5px 20px 5px;border: 1px solid rgb(100,149,198);background: #fff no-repeat center;background-size: cover;}
+    .progress{position: absolute;width: 100%;height: 20px;line-height: 20px;bottom: 0;left: 0;background-color:rgba(100,149,198,.5);}
+    .progress span{display: block;width: 0;height: 100%;background-color:rgb(100,149,198);text-align: center;color: #FFF;font-size: 13px;}
+    .size{position: absolute;width: 100%;height: 15px;line-height: 15px;bottom: -18px;text-align: center;font-size: 13px;color: #666;}
+    .tips{display: block;text-align:center;font-size: 13px;margin: 10px;color: #999;}
+    .pic-list{margin: 10px;line-height: 18px;font-size: 13px;}
+    .pic-list a{display: block;margin: 10px 0;}
+    .pic-list a img{vertical-align: middle;max-width: 30px;max-height: 30px;margin: -4px 0 0 10px;}
   </style>
 </head>
 <body>
 <input type="file" id="choose" accept="image/*" multiple>
-<ul class="img-list">
-  <!--<li style="background-image:url('/public/upload/upload.jpeg')">-->
-  <!--<div class="progress"><span style="width: 100%">上传成功</span></div>-->
-  <!--<div class="size">100KB</div>-->
-  <!--</li>-->
-</ul>
+<ul class="img-list"></ul>
 <a id="upload">上传图片</a>
 <span class="tips">只允许上传jpg、png及gif</span>
-
 <div class="pic-list">
   你上传的图片(图片有效期为1分钟)：
 </div>
@@ -282,11 +183,11 @@
       buffer[i] = text.charCodeAt(i);
     }
 
-    var blob = getBlob(buffer, type);
+    var blob = getBlob([buffer], type);
 
     var xhr = new XMLHttpRequest();
 
-    var formdata = new FormData();
+    var formdata = getFormData();
 
     formdata.append('imagefile', blob);
 
@@ -295,16 +196,21 @@
     xhr.onreadystatechange = function() {
       if (xhr.readyState == 4 && xhr.status == 200) {
         var jsonData = JSON.parse(xhr.responseText);
-        console.log('上传成功：' + jsonData[0].path);
+        var imagedata = jsonData[0] || {};
+        var text = imagedata.path ? '上传成功' : '上传失败';
+
+        console.log(text + '：' + imagedata.path);
 
         clearInterval(loop);
 
         //当收到该消息时上传完毕
         $li.find(".progress span").animate({'width': "100%"}, pecent < 95 ? 200 : 0, function() {
-          $(this).html("上传成功");
+          $(this).html(text);
         });
 
-        $(".pic-list").append('<a href="' + jsonData[0].path + '">' + jsonData[0].path + '（' + jsonData[0].size + '）<img src="' + jsonData[0].path + '" /></a>');
+        if (!imagedata.path) return;
+
+        $(".pic-list").append('<a href="' + imagedata.path + '">' + imagedata.path + '（' + imagedata.size + '）<img src="' + imagedata.path + '" /></a>');
       }
     };
 
@@ -337,16 +243,92 @@
     xhr.send(formdata);
   }
 
-  // 获取blob对象的兼容性写法
+  /**
+   * 获取blob对象的兼容性写法
+   * @param buffer
+   * @param format
+   * @returns {*}
+   */
   function getBlob(buffer, format) {
-    var Builder = window.WebKitBlobBuilder || window.MozBlobBuilder;
-    if (Builder) {
-      var builder = new Builder;
-      builder.append(buffer);
-      return builder.getBlob(format);
-    } else {
-      return new window.Blob([buffer], {type: format});
+    try {
+      return new Blob(buffer, {type: format});
+    } catch (e) {
+      var bb = new (window.BlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder);
+      buffer.forEach(function(buf) {
+        bb.append(buf);
+      });
+      return bb.getBlob(format);
     }
+  }
+
+  /**
+   * 获取formdata
+   */
+  function getFormData() {
+    var isNeedShim = ~navigator.userAgent.indexOf('Android')
+        && ~navigator.vendor.indexOf('Google')
+        && !~navigator.userAgent.indexOf('Chrome')
+        && navigator.userAgent.match(/AppleWebKit\/(\d+)/).pop() <= 534;
+
+    return isNeedShim ? new FormDataShim() : new FormData()
+  }
+
+  /**
+   * formdata 补丁, 给不支持formdata上传blob的android机打补丁
+   * @constructor
+   */
+  function FormDataShim() {
+    console.warn('using formdata shim');
+
+    var o = this,
+        parts = [],
+        boundary = Array(21).join('-') + (+new Date() * (1e16 * Math.random())).toString(36),
+        oldSend = XMLHttpRequest.prototype.send;
+
+    this.append = function(name, value, filename) {
+      parts.push('--' + boundary + '\r\nContent-Disposition: form-data; name="' + name + '"');
+
+      if (value instanceof Blob) {
+        parts.push('; filename="' + (filename || 'blob') + '"\r\nContent-Type: ' + value.type + '\r\n\r\n');
+        parts.push(value);
+      }
+      else {
+        parts.push('\r\n\r\n' + value);
+      }
+      parts.push('\r\n');
+    };
+
+    // Override XHR send()
+    XMLHttpRequest.prototype.send = function(val) {
+      var fr,
+          data,
+          oXHR = this;
+
+      if (val === o) {
+        // Append the final boundary string
+        parts.push('--' + boundary + '--\r\n');
+
+        // Create the blob
+        data = getBlob(parts);
+
+        // Set up and read the blob into an array to be sent
+        fr = new FileReader();
+        fr.onload = function() {
+          oldSend.call(oXHR, fr.result);
+        };
+        fr.onerror = function(err) {
+          throw err;
+        };
+        fr.readAsArrayBuffer(data);
+
+        // Set the multipart content type and boudary
+        this.setRequestHeader('Content-Type', 'multipart/form-data; boundary=' + boundary);
+        XMLHttpRequest.prototype.send = oldSend;
+      }
+      else {
+        oldSend.call(this, val);
+      }
+    };
   }
 </script>
 </body>
