@@ -44,6 +44,7 @@ function cupload(req, res) {
         // 塞入响应数据中
         responseData.push({
           type: file.type,
+          name: 'filename',
           path: '/public/upload/' + filename,
           size: file.size / 1024 > 1024 ? (~~(10 * file.size / 1024 / 1024)) / 10 + "MB" : ~~(file.size / 1024) + "KB"
         });
