@@ -1,6 +1,8 @@
 # node-test
 nodejs test demos
 
+因服务器停止续费，效果预览将无法访问，有兴趣的自行download后看效果
+
 平时写的一些nodejs的小demo，不定时更新：
 
 [co函数简易实现](https://github.com/whxaxes/node-test/blob/master/other/myco.js)，[koa中间件简易实现](https://github.com/whxaxes/node-test/blob/master/other/mykoa.js)，[koa中间件实现_2](https://github.com/whxaxes/node-test/blob/master/other/mykoa_2.js)
