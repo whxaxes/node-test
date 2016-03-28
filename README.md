@@ -5,6 +5,11 @@ nodejs test demos
 
 ## 服务器已停，若要预览效果请下载到本地尝试
 
+```
+1. npm install
+2. cd server && node app.js
+```
+
 [co函数简易实现](https://github.com/whxaxes/node-test/blob/master/other/myco.js)
 
 [koa中间件简易实现](https://github.com/whxaxes/node-test/blob/master/other/mykoa.js)
