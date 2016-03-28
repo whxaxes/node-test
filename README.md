@@ -5,7 +5,7 @@ nodejs test demos
 
 [co函数简易实现](https://github.com/whxaxes/node-test/blob/master/other/myco.js)，[koa中间件简易实现](https://github.com/whxaxes/node-test/blob/master/other/mykoa.js)，[koa中间件实现_2](https://github.com/whxaxes/node-test/blob/master/other/mykoa_2.js)
 
-[bigpipe](https://github.com/whxaxes/node-test/tree/master/server/bigpipe)：效果预览：[bigpipe](http://node-tester-171479.nitrousapp.com:9030/bigpipe)
+[bigpipe测试](https://github.com/whxaxes/node-test/tree/master/server/bigpipe)：效果预览：[bigpipe](http://node-tester-171479.nitrousapp.com:9030/bigpipe)
 
 [简易爬虫，爬取了一些博客内容](https://github.com/whxaxes/node-test/tree/master/server/creeper)：效果预览：[creeper](http://node-tester-171479.nitrousapp.com:9030/creeper)
 
