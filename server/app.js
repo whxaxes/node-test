@@ -1,21 +1,15 @@
 "use strict";
 
-var http = require('http');
-var fs = require('fs');
-var url = require('url');
-var crypto = require('crypto');
+const http = require('http');
+const fs = require('fs');
+const url = require('url');
+const crypto = require('crypto');
+const path = require('path');
+const router = require('./router');
 
 //静态资源目录
-global.STATIC_PATH = "../public/";
+global.STATIC_PATH = path.join(__dirname, "../public/");
 global.PATH_LINE = __dirname.match(/\/|\\/)[0];
-
-var router = require('easy-router');
-
-router.setMap({
-    "/topic/*": STATIC_PATH + "txwork/topic_*.html",
-
-    "/public/**/*": STATIC_PATH + "**/*"        //静态资源
-});
 
 require('./bigpipe/bigpipe');
 require('./creeper/creeper');
@@ -24,22 +18,24 @@ require('./pjax/pjax');
 require('./transdata/tdata');
 require('./crossorigin/cross');
 
-var websocket = require("./websocket/socket");
+const websocket = require("./websocket/socket");
 
-var server = http.createServer(function (req, res) {
-    router.route(req, res);
+const server = http.createServer((req, res) => {
+  router.route(req, res);
 }).listen(9030);
 
-websocket.upgrad(server, function (ws) {
-    ws.on('close', function (reason) {
-        console.log("socket closed:" + reason);
-    });
+console.log('server listen 9030');
 
-    ws.on('message', function (data) {
-        websocket.brocast(data);
-    });
+websocket.upgrad(server, (ws) => {
+  ws.on('close', (reason) => {
+    console.log("socket closed:" + reason);
+  });
+
+  ws.on('message', (data) => {
+    websocket.brocast(data);
+  });
 });
 
-global.directTo404 = function (res) {
-    router.error(res);
+global.directTo404 = (res) => {
+  router.error(res);
 };

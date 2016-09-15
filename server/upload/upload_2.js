@@ -4,15 +4,15 @@
 "use strict";
 
 var fs = require('fs');
-var router = require("easy-router");
+var router = require("../router");
 //var FormParser = require("./formParser");
 var formidable = require('formidable');
 var path = require('path');
 
-var fileSaveDir = STATIC_PATH + 'upload';
+var fileSaveDir = path.join(STATIC_PATH, 'upload');
 
 router.setMap({
-  "uindex_2": "upload/index_2.html",
+  "uindex_2": path.join(__dirname, "./index_2.html"),
   "cupload": cupload
 });
 

@@ -6,7 +6,7 @@
   "dependencies": {
     "cheerio": "^0.19.0",
     "del": "*",
-    "easy-router": "^2.1.2",
+    "easy-router": "^2.2.5",
     "ejs": "^2.3.1",
     "formidable": "^1.0.17",
     "gulp": "^3.8.11",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "server": "node server/app.js"
   },
   "author": "wanghx",
   "license": "ISC"

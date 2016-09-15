@@ -56,7 +56,7 @@ class WebSocket extends EventEmitter {
 
   /**
    * 广播信息
-   * @param  {String} message 
+   * @param  {String} message
    */
   brocast(message) {
     webSocketCollector.forEach(function(ws) {

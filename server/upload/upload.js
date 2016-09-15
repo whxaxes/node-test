@@ -7,14 +7,15 @@ var http = require('http');
 var fs = require('fs');
 var crypto = require("crypto");
 var del = require("del");
-var router = require("easy-router");
+var router = require("../router");
+var path = require('path');
 
 var sessionMaps = {};
 
 require("./upload_2");
 
 router.setMap({
-  "upl": "upload/upload.html",
+  "upl": path.join(__dirname, "upload.html"),
   "uindex": page,
   "getProgress": getProgress,
   "upload": upload
@@ -40,7 +41,7 @@ function page(req, res) {
     }
   }
 
-  router.routeTo(req, res, 'upload/index.html', {
+  router.routeTo(req, res, path.join(__dirname, "upload/index.html"), {
     'Set-Cookie': 'upload_id=' + symbol
   });
 }
@@ -72,20 +73,20 @@ function upload(req, res) {
     num = 0,
     isStart = false;
 
-  var ws, filename, path;
+  var ws, filename, filepath;
   var sessionMap = sessionMaps[getSymbol(req)] || {};
 
   try {
-    fs.statSync(STATIC_PATH + '/upload')
+    fs.statSync(path.join(STATIC_PATH, '/upload'))
   } catch (e) {
-    fs.mkdirSync(STATIC_PATH + '/upload')
+    fs.mkdirSync(path.join(STATIC_PATH, '/upload'))
   }
 
   //文件大小
   var fileSize = req.headers['content-length'];
   var maxSize = 5;
   if ((fileSize / 1024 / 1024) > maxSize) {
-    res.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
+    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
     res.end('<div id="reason">上传的文件不能大于' + maxSize + 'M</div>');
     return;
   }
@@ -123,8 +124,8 @@ function upload(req, res) {
 
           var str = (new Buffer(imgsays)).toString();
           filename = str.match(/filename=".*"/g)[0].split('"')[1];
-          path = STATIC_PATH + 'upload/' + filename;
-          ws = fs.createWriteStream(path);
+          filepath = path.join(STATIC_PATH, 'upload/' + filename);
+          ws = fs.createWriteStream(filepath);
 
         } else if (i == chunk.length - 2) {    //说明到了数据尾部的\r\n
           end = rems[rems.length - 2];
@@ -145,7 +146,7 @@ function upload(req, res) {
   req.on("end", function() {
     ws.end();
     console.log("保存" + filename + "成功");
-    res.writeHead(200, {'Content-Type': 'text/html;charset=utf-8'});
+    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
     res.end('<div id="path">/public/upload/' + filename + '</div>');
 
 //        防止他人上传大量图片，每次上传一次图片将此前上传的删除
@@ -156,13 +157,13 @@ function upload(req, res) {
 
 //        同时设个定时器，所有图片一分钟后如果还存在则删除
     setTimeout(function() {
-      if (fs.existsSync(STATIC_PATH + 'upload/' + filename)) {
+      if (fs.existsSync(path.join(STATIC_PATH, 'upload/' + filename))) {
         console.log("删除" + filename);
-        fs.unlinkSync(STATIC_PATH + 'upload/' + filename)
+        fs.unlinkSync(path.join(STATIC_PATH, 'upload/' + filename))
       }
     }, 60 * 1000);
 
-    sessionMap.file = STATIC_PATH + 'upload/' + filename;
+    sessionMap.file = path.join(STATIC_PATH, 'upload/' + filename);
     sessionMap.speed = 0;
     sessionMap.size = 0;
     sessionMap.now = 0;
