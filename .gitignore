@@ -4,3 +4,4 @@ server/creeper/config.js
 .svn/
 public/txwork/
 .idea
+npm-debug.log
