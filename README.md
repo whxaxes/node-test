@@ -11,14 +11,15 @@ nodejs test demos
 ```
 
 ## 一些页面路由
-```
-1. websocket: http://127.0.0.1/wsindex
-2. 上传：http://127.0.0.1/upl
-3. 上传2：http://127.0.0.1/uindex_2
-4. pjax：http://127.0.0.1/pjax/pjax1.html
-5. 爬虫：http://127.0.0.1/creeper
-6. bigpipe：http://127.0.0.1/bigpipe
-```
+
+ - websocket: http://127.0.0.1:9030/wsindex
+ - 上传：http://127.0.0.1:9030/uindex
+ - 上传2：http://127.0.0.1:9030/uindex_2
+ - pjax：http://127.0.0.1:9030/pjax/pjax1.html
+ - 爬虫：http://127.0.0.1:9030/creeper
+ - bigpipe：http://127.0.0.1:9030/bigpipe
+
+## 文件地址
 
 [co函数简易实现](https://github.com/whxaxes/node-test/blob/master/other/myco.js)
 
