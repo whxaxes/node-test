@@ -41,7 +41,7 @@ function page(req, res) {
     }
   }
 
-  router.routeTo(req, res, path.join(__dirname, "upload/index.html"), {
+  router.routeTo(req, res, path.join(__dirname, "./index.html"), {
     'Set-Cookie': 'upload_id=' + symbol
   });
 }
@@ -84,12 +84,12 @@ function upload(req, res) {
 
   //文件大小
   var fileSize = req.headers['content-length'];
-  var maxSize = 5;
-  if ((fileSize / 1024 / 1024) > maxSize) {
-    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
-    res.end('<div id="reason">上传的文件不能大于' + maxSize + 'M</div>');
-    return;
-  }
+  // var maxSize = 5;
+  // if ((fileSize / 1024 / 1024) > maxSize) {
+  //   res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
+  //   res.end('<div id="reason">上传的文件不能大于' + maxSize + 'M</div>');
+  //   return;
+  // }
 
   var time = new Date();
   sessionMap.size = fileSize;
@@ -150,18 +150,18 @@ function upload(req, res) {
     res.end('<div id="path">/public/upload/' + filename + '</div>');
 
 //        防止他人上传大量图片，每次上传一次图片将此前上传的删除
-    if (fs.existsSync(sessionMap.file)) {
-      console.log("删除" + sessionMap.file);
-      fs.unlinkSync(sessionMap.file)
-    }
+    // if (fs.existsSync(sessionMap.file)) {
+    //   console.log("删除" + sessionMap.file);
+    //   fs.unlinkSync(sessionMap.file)
+    // }
 
 //        同时设个定时器，所有图片一分钟后如果还存在则删除
-    setTimeout(function() {
-      if (fs.existsSync(path.join(STATIC_PATH, 'upload/' + filename))) {
-        console.log("删除" + filename);
-        fs.unlinkSync(path.join(STATIC_PATH, 'upload/' + filename))
-      }
-    }, 60 * 1000);
+    // setTimeout(function() {
+    //   if (fs.existsSync(path.join(STATIC_PATH, 'upload/' + filename))) {
+    //     console.log("删除" + filename);
+    //     fs.unlinkSync(path.join(STATIC_PATH, 'upload/' + filename))
+    //   }
+    // }, 60 * 1000);
 
     sessionMap.file = path.join(STATIC_PATH, 'upload/' + filename);
     sessionMap.speed = 0;
