@@ -29,8 +29,8 @@ var sourceList = {
     handle: function($colum) {
       var time = $colum.find(".post-meta p").eq(0).text().match(TIME_REG_3);
       return {
-        url: $colum.find(".meta-title").attr("href"),
-        title: $colum.find(".meta-title").text(),
+        url: $colum.find(".archive-title").attr("href"),
+        title: $colum.find(".archive-title").text(),
         time: (time instanceof Array) ? time[0] : ""
       }
     }

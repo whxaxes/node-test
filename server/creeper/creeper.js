@@ -1,26 +1,29 @@
-"use strict";
+'use strict';
 
-var fs = require("fs");
-var path = require("path");
-var transdata = require("transdata");
-var router = require("../router");
+var fs = require('fs');
+var path = require('path');
+var transdata = require('transdata');
+var router = require('../router');
 
-var cheerio = require("cheerio");
-var ejs = require("ejs");
-var source = require("./source");
-var EventEmitter = require("events").EventEmitter;
-var redis = require("redis");
+var cheerio = require('cheerio');
+var Mus = require('node-mus');
+var mus = new Mus({
+  baseDir: path.join(__dirname, './views')
+});
+var source = require('./source');
+var EventEmitter = require('events').EventEmitter;
+var redis = require('redis');
 
 //连接redis
 var client = redis.createClient();
 var REDIS_OK = false;
 
-client.on("connect", function() {
-  console.log("redis 连接成功");
+client.on('connect', function() {
+  console.log('redis 连接成功');
   REDIS_OK = true;
-}).on("error", function() {
+}).on('error', function() {
   REDIS_OK = false;
-}).on("end", function() {
+}).on('end', function() {
   REDIS_OK = false;
 });
 
@@ -28,10 +31,10 @@ var emitter = new EventEmitter;
 emitter.setMaxListeners(0);
 
 //监听source文件改动，从而刷新引用的模块
-fs.watch(require.resolve("./source.js"), function(e, filename) {
-  if (e !== "change") return;
-  cleanCache(require.resolve("./source.js"));
-  source = require("./source");
+fs.watch(require.resolve('./source.js'), function(e, filename) {
+  if (e !== 'change') return;
+  cleanCache(require.resolve('./source.js'));
+  source = require('./source');
 });
 
 //清除模块缓存
@@ -47,28 +50,24 @@ function cleanCache(modulePath) {
 
 //处理爬取数据
 var creeper = function(req, res) {
-  var header = fs.readFileSync(path.join(__dirname, "./views/header.ejs")).toString();
-  var contents = fs.readFileSync(path.join(__dirname, "./views/contents.ejs")).toString();
-  var foot = fs.readFileSync(path.join(__dirname, "./views/foot.ejs")).toString();
-
   res.writeHead(200, { 'content-type': 'text/html;charset=utf-8' });
-  res.write(ejs.render(header, { keys: source.keys }));
+  res.write(mus.render('header', { keys: source.keys }));
 
-  //console.log("采集数据...");
+  //console.log('采集数据...');
 
   var count = 0;
   source.forEach(function(index, id) {
     var nowSource = this;
 
     //将请求全部压入事件堆栈
-    emitter.once("event_" + index, function(msg, result) {
+    emitter.once('event_' + index, function(msg, result) {
       nowSource.isLoading = false;
       count++;
 
-      if (msg == "error") {
-        //console.log(">【"+id+ "】fail× ："+result.message);
+      if (msg == 'error') {
+        //console.log('>【'+id+ '】fail× ：'+result.message);
       } else {
-        //console.log(">【"+id+ "】get√");
+        //console.log('>【'+id+ '】get√');
 
         var $ = cheerio.load(result);
         var $colum = $(nowSource.colum);
@@ -79,7 +78,7 @@ var creeper = function(req, res) {
             result.push(list)
           }
         });
-        if (typeof +nowSource.max == "number") {
+        if (typeof +nowSource.max == 'number') {
           result = result.slice(0, nowSource.max)
         }
 
@@ -88,15 +87,15 @@ var creeper = function(req, res) {
           data[id] = result;
           result.index = index;
 
-          var html = ejs.render(contents, { data: data, url: nowSource.url });
-          html = html.replace(/(\r|\n)\s*/g, '').replace(/'/g, "\\'");
-          res.write("<script>loadHtml(" + index + " , 'dom_" + index + "' , '" + html + "')</script>");
+          var html = mus.render('contents', { data: data, url: nowSource.url });
+          html = html.replace(/(\r|\n)\s*/g, '').replace(/'/g, '\\\'');
+          res.write(`<script>loadHtml('${index}', 'dom_${index}', '${html}')</script>`);
         }
       }
 
       if (count == source.length) {
-        //console.log("数据采集完成..");
-        res.end(foot);
+        //console.log('数据采集完成..');
+        res.end(`</div></body></html>`);
       }
     });
 
@@ -120,7 +119,7 @@ var creeper = function(req, res) {
         if (!obj || (obj && ((time - obj.time) >= 60 * 60 * 1000))) {
           requestData();
         } else {
-          emitter.emit("event_" + index, 'success', obj.html);
+          emitter.emit('event_' + index, 'success', obj.html);
         }
       });
     }
@@ -133,12 +132,12 @@ var creeper = function(req, res) {
             html: result
           });
         }
-        emitter.emit("event_" + index, 'success', result);
+        emitter.emit('event_' + index, 'success', result);
       }, function(err) {
-        emitter.emit("event_" + index, 'error', err);
+        emitter.emit('event_' + index, 'error', err);
       })
     }
   });
 };
 
-router.setMap("creeper", creeper);
+router.setMap('creeper', creeper);
