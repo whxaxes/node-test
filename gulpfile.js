@@ -1,10 +1,10 @@
-var gulp = require("gulp");
-var livereload = require("gulp-livereload");
+var gulp = require('gulp');
+var livereload = require('gulp-livereload');
 
-gulp.task('watch' , function(){
-    livereload.listen();
+gulp.task('watch', function() {
+  livereload.listen();
 
-    gulp.watch(['**/*.css', '**/*.js', '**/*.html'], function(file){
-        livereload.changed(file.path)
-    });
+  gulp.watch(['**/*.css', '**/*.js', '**/*.html'], function(file) {
+    livereload.changed(file.path);
+  });
 });

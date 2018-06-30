@@ -5,3 +5,4 @@ server/creeper/config.js
 public/txwork/
 .idea
 npm-debug.log
+yarn.lock

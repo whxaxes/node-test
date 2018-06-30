@@ -12,12 +12,16 @@
     "gulp-livereload": "^3.8.0",
     "node-mus": "^0.5.0",
     "nodemailer": "^1.3.4",
+    "pm2": "^2.10.4",
     "redis": "^0.12.1",
     "transdata": "*"
   },
   "devDependencies": {},
   "scripts": {
-    "server": "node server/app.js"
+    "dev": "node index",
+    "start": "pm2 start -n node-test ./index.js",
+    "stop": "pm2 stop node-test",
+    "restart": "pm2 restart node-test"
   },
   "author": "wanghx",
   "license": "ISC"
