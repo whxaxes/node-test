@@ -3,21 +3,24 @@ nodejs test demos
 
 平时写的一些nodejs的小demo，不定时更新：
 
-## 服务器已停，若要预览效果请下载到本地尝试
+## 在线预览
 
+ - websocket: http://demo.wanghx.cn/wsindex
+ - 上传：http://demo.wanghx.cn/uindex
+ - 上传2：http://demo.wanghx.cn/uindex_2
+ - pjax：http://demo.wanghx.cn/pjax/pjax1.html
+ - 爬虫：http://demo.wanghx.cn/creeper
+ - bigpipe：http://demo.wanghx.cn/bigpipe
+
+## 本地
+
+```bash
+// 开发
+$ npm run dev
+
+// fork
+$ npm run start
 ```
-1. npm install
-2. npm run server
-```
-
-## 一些页面路由
-
- - websocket: http://127.0.0.1:9030/wsindex
- - 上传：http://127.0.0.1:9030/uindex
- - 上传2：http://127.0.0.1:9030/uindex_2
- - pjax：http://127.0.0.1:9030/pjax/pjax1.html
- - 爬虫：http://127.0.0.1:9030/creeper
- - bigpipe：http://127.0.0.1:9030/bigpipe
 
 ## 文件地址
 

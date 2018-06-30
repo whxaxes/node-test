@@ -16,9 +16,11 @@
     "redis": "^0.12.1",
     "transdata": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "concurrently": "^3.6.0"
+  },
   "scripts": {
-    "dev": "node index",
+    "dev": "concurrently -r 'node index' 'gulp watch'",
     "start": "pm2 start -n node-test ./index.js",
     "stop": "pm2 stop node-test",
     "restart": "pm2 restart node-test"
