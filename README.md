@@ -6,8 +6,8 @@ nodejs test demos
 ## 在线预览
 
  - websocket: http://demo.wanghx.cn/wsindex
- - 上传：http://demo.wanghx.cn/uindex
- - 上传2：http://demo.wanghx.cn/uindex_2
+ - 普通上传：http://demo.wanghx.cn/uindex
+ - 移动端图片上传：http://demo.wanghx.cn/uindex_2
  - pjax：http://demo.wanghx.cn/pjax/pjax1.html
  - 爬虫：http://demo.wanghx.cn/creeper
  - bigpipe：http://demo.wanghx.cn/bigpipe
