@@ -1,24 +1,24 @@
 /*
  *PC端文件上传功能
  */
-"use strict";
+'use strict';
 
 var http = require('http');
 var fs = require('fs');
-var crypto = require("crypto");
-var del = require("del");
-var router = require("../router");
+var crypto = require('crypto');
+var del = require('del');
+var router = require('../router');
 var path = require('path');
 
 var sessionMaps = {};
 
-require("./upload_2");
+require('./upload_2');
 
 router.setMap({
-  "upl": path.join(__dirname, "upload.html"),
-  "uindex": page,
-  "getProgress": getProgress,
-  "upload": upload
+  upl: path.join(__dirname, 'upload.html'),
+  uindex: page,
+  getProgress: getProgress,
+  upload: upload,
 });
 
 //获取上传进度信息
@@ -37,12 +37,12 @@ function page(req, res) {
       now: 0,
       speed: 0,
       size: 0,
-      file: ""
-    }
+      file: '',
+    };
   }
 
-  router.routeTo(req, res, path.join(__dirname, "./index.html"), {
-    'Set-Cookie': 'upload_id=' + symbol
+  router.routeTo(req, res, path.join(__dirname, './index.html'), {
+    'Set-Cookie': 'upload_id=' + symbol,
   });
 }
 
@@ -50,11 +50,11 @@ function page(req, res) {
 function parseCookie(cookie) {
   var cookieObj = {};
 
-  if (typeof cookie == "string") {
-    var array = cookie.split(";");
+  if (typeof cookie == 'string') {
+    var array = cookie.split(';');
     array.forEach(function(a, i) {
-      var sa = a.split("=", 2);
-      cookieObj[sa[0].trim()] = sa[1].trim()
+      var sa = a.split('=', 2);
+      cookieObj[sa[0].trim()] = sa[1].trim();
     });
   }
 
@@ -77,9 +77,9 @@ function upload(req, res) {
   var sessionMap = sessionMaps[getSymbol(req)] || {};
 
   try {
-    fs.statSync(path.join(STATIC_PATH, '/upload'))
+    fs.statSync(path.join(STATIC_PATH, '/upload'));
   } catch (e) {
-    fs.mkdirSync(path.join(STATIC_PATH, '/upload'))
+    fs.mkdirSync(path.join(STATIC_PATH, '/upload'));
   }
 
   //文件大小
@@ -102,13 +102,13 @@ function upload(req, res) {
     sessionMap.now += chunk.length;
 
     var ntime = new Date();
-    var speed = ~~(((chunk.length / 1024) / ((ntime - time) / 1000)) + 0.5);
+    var speed = ~~(chunk.length / 1024 / ((ntime - time) / 1000) + 0.5);
     if (speed > 0) {
       if (speed <= 1024) {
-        sessionMap.speed = speed + "KB/S";
+        sessionMap.speed = speed + 'KB/S';
       } else {
         speed = ~~(speed / 1024);
-        sessionMap.speed = speed + "MB/S";
+        sessionMap.speed = speed + 'MB/S';
       }
     }
     time = ntime;
@@ -122,19 +122,19 @@ function upload(req, res) {
           start = i + 2;
           isStart = true;
 
-          var str = (new Buffer(imgsays)).toString();
+          var str = new Buffer(imgsays).toString();
           filename = str.match(/filename=".*"/g)[0].split('"')[1];
           filepath = path.join(STATIC_PATH, 'upload/' + filename);
           ws = fs.createWriteStream(filepath);
-
-        } else if (i == chunk.length - 2) {    //说明到了数据尾部的\r\n
+        } else if (i == chunk.length - 2) {
+          //说明到了数据尾部的\r\n
           end = rems[rems.length - 2];
           break;
         }
       }
 
       if (num < 4) {
-        imgsays.push(chunk[i])
+        imgsays.push(chunk[i]);
       }
     }
 
@@ -143,25 +143,25 @@ function upload(req, res) {
     }
   });
 
-  req.on("end", function() {
+  req.on('end', function() {
     ws.end();
-    console.log("保存" + filename + "成功");
+    console.log('保存' + filename + '成功');
     res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
     res.end('<div id="path">/public/upload/' + filename + '</div>');
 
-//        防止他人上传大量图片，每次上传一次图片将此前上传的删除
-    // if (fs.existsSync(sessionMap.file)) {
-    //   console.log("删除" + sessionMap.file);
-    //   fs.unlinkSync(sessionMap.file)
-    // }
+    // 防止他人上传大量图片，每次上传一次图片将此前上传的删除
+    if (fs.existsSync(sessionMap.file)) {
+      console.log('删除' + sessionMap.file);
+      fs.unlinkSync(sessionMap.file);
+    }
 
-//        同时设个定时器，所有图片一分钟后如果还存在则删除
-    // setTimeout(function() {
-    //   if (fs.existsSync(path.join(STATIC_PATH, 'upload/' + filename))) {
-    //     console.log("删除" + filename);
-    //     fs.unlinkSync(path.join(STATIC_PATH, 'upload/' + filename))
-    //   }
-    // }, 60 * 1000);
+    // 同时设个定时器，所有图片一分钟后如果还存在则删除
+    setTimeout(function() {
+      if (fs.existsSync(path.join(STATIC_PATH, 'upload/' + filename))) {
+        console.log('删除' + filename);
+        fs.unlinkSync(path.join(STATIC_PATH, 'upload/' + filename));
+      }
+    }, 60 * 1000);
 
     sessionMap.file = path.join(STATIC_PATH, 'upload/' + filename);
     sessionMap.speed = 0;
@@ -169,4 +169,3 @@ function upload(req, res) {
     sessionMap.now = 0;
   });
 }
-
