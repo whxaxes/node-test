@@ -5,3 +5,9 @@
 'use strict';
 
 require('./server/app');
+
+aws
+werwrwrw
+
+ddf
+sadasfasas
